@@ -238,14 +238,16 @@ window.addEventListener('DOMContentLoaded', function() {
     // Create the ground (grass field)
     var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
 
-    var planeMaterial = new THREE.MeshLambertMaterial({
-        map: THREE.ImageUtils.loadTexture('images/grass.png'),
-        color: 0xffffff});
+    var planeMaterial = Physijs.createMaterial(
+        new THREE.MeshLambertMaterial({
+            map: THREE.ImageUtils.loadTexture('images/grass.png'),
+            color: 0xffffff}),
+        .8, // high friction
+        .3 // low restitution
+        );
 
-    planeMaterial.map.repeat.x = 300;
-    planeMaterial.map.repeat.y = 300;
-    planeMaterial.map.wrapS = THREE.RepeatWrapping;
-    planeMaterial.map.wrapT = THREE.RepeatWrapping;
+    planeMaterial.map.repeat.set(300, 300);
+    planeMaterial.map.wrapS = planeMaterial.map.wrapT = THREE.RepeatWrapping;
 
     var plane = new Physijs.BoxMesh(planeGeometry, planeMaterial, 0);
 
@@ -274,13 +276,18 @@ window.addEventListener('DOMContentLoaded', function() {
 
     for (var i = 0; i < 100; i++){
 
-        meshArray[i] = new THREE.Mesh(geometry,
+        meshArray[i] = new Physijs.BoxMesh(geometry,
                                       new THREE.MeshLambertMaterial({
                                         color: 0xffffff * Math.random()}));
 
         meshArray[i].position.x = i % 2 * 5 - 2.5;
-        meshArray[i].position.y = .5;
+        meshArray[i].position.y = 1.5;
         meshArray[i].position.z = -1 * i * 4;
+
+        meshArray[i].rotation.x = Math.random();
+        meshArray[i].rotation.y = Math.random();
+        meshArray[i].rotation.z = Math.random();
+
         meshArray[i].castShadow = true;
         meshArray[i].receiveShadow = true;
         scene.add(meshArray[i]);

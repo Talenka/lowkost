@@ -16,6 +16,7 @@ canvas{
 <script src="js/three.min.js"></script>
 <script>
 
+/** @type {Object} The player */
 var player = {
     model : {       
         objects : new THREE.Object3D(),
@@ -37,18 +38,35 @@ var player = {
     }
 }
 
+/** @type {Object} The universe time */
+var clock;
+
 /** @type {boolean} true/false : 1st/3rd person camera mode. */
 var isCameraFirstPerson = false;
+
+/** @type {number} Window's width in pixel */
+var width;
+
+/** @type {number} Window's height in pixel */
+var height;
+
+/** @type {Object} The scene with physics */
+var scene;
+
+/** @type {Object} The renderer engine */
+var renderer;
 
 // When html is fully loaded :
 window.addEventListener('DOMContentLoaded', function(){
 
-    var width = window.innerWidth;
-    var height = window.innerHeight;
+    width = window.innerWidth;
+    height = window.innerHeight;
 
-    var clock = new THREE.Clock();
+    clock = new THREE.Clock();
 
-    var scene = new THREE.Scene();
+    window.console.log(clock);
+
+    scene = new THREE.Scene();
 
     // Initialize renderer engine
     renderer = new THREE.WebGLRenderer({antialias: true});
@@ -149,14 +167,23 @@ window.addEventListener('DOMContentLoaded', function(){
         var animMin = md2frames[motion][0];
         var animMax = md2frames[motion][1];
         var animFps = md2frames[motion][2];
+
         md2meshBody.time = 0;
         md2meshBody.duration = 1000 * (( animMax - animMin ) / animFps);
         md2meshBody.setFrameRange( animMin, animMax );
     }
     
     var md2meshBody;
-    var material = new THREE.MeshLambertMaterial( { map: THREE.ImageUtils.loadTexture( 'images/1.png' ), ambient: 0x999999, color: 0xffffff, specular: 0xffffff, shininess: 25, morphTargets: true } );
+
+    var material = new THREE.MeshLambertMaterial({map: THREE.ImageUtils.loadTexture('images/1.png'),
+                                                  ambient: 0x999999,
+                                                  color: 0xffffff,
+                                                  specular: 0xffffff,
+                                                  shininess: 25,
+                                                  morphTargets: true});
+
     var loader = new THREE.JSONLoader();
+
     loader.load( 'js/droid.js', function( geometry ) {
         md2meshBody = new THREE.MorphAnimMesh( geometry, material );
         md2meshBody.rotation.y = -Math.PI / 2;
@@ -168,18 +195,24 @@ window.addEventListener('DOMContentLoaded', function(){
         player.model.objects.add( md2meshBody );
         console.log(player.model.objects)
     } );
-    
-/**
- * action
- */
-    document.addEventListener('keydown',function(e){
-        if( !/67/.test(e.keyCode)){ return } //c key
-        if(player.model.state === 'stand'){
-            changeMotion('crstand');
-        }else if(player.model.state === 'crstand'){
-            changeMotion('stand');
-        }
-    }, false);
+
+
+var keyboard = {
+    c: 67
+};
+
+function keyboardControls(e) {
+
+    if (e.keyCode === keyboard.c) {
+        if (player.model.state === 'stand') changeMotion('crstand');
+        else if(player.model.state === 'crstand') changeMotion('stand');
+    }
+}
+
+
+document.addEventListener('keydown', keyboardControls);
+
+
     
 /**
  * move

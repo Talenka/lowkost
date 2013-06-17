@@ -393,7 +393,7 @@ window.Physijs = (function() {
 		Eventable.call( this );
 		THREE.Scene.call( this );
 
-		this._worker = new Worker( Physijs.scripts.worker || 'physijs_worker.js' );
+		this._worker = new Worker( Physijs.scripts.worker || 'js/physijs_worker.js' );
 		this._worker.transferableMessage = this._worker.webkitPostMessage || this._worker.postMessage;
 		this._materials = {};
 		this._objects = {};

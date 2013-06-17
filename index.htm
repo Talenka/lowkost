@@ -2,8 +2,13 @@
 <style>
 body{background:#99f}
 canvas{position:absolute;top:0;left:0;cursor:none}</style>
-<script src="js/three.min.js"></script>
+<script src="js/three.min.js"></script><script src="js/physi.js"></script>
 <script>
+
+// "use strict";
+
+Physijs.scripts.worker = "js/physijs_worker.js";
+Physijs.scripts.ammo = "ammo.js";
 
 /** @type {boolean} true/false : 1st/3rd person camera mode. */
 var isCameraFirstPerson = false;
@@ -12,24 +17,9 @@ var thirdPersonCameraDistance = 5;
 
 /** @type {Object} The player */
 var player = {
-    model : {       
-        objects : new THREE.Object3D(),
-        motion  : 'stand',
-        state   : 'stand'
-    },
-    position: {
-        x : 0,
-        y : 0,
-        z : 0,
-        direction : 0
-    },
-    camera : {
-        speed : 300,
-        distance : thirdPersonCameraDistance,
-        x : 0,
-        y : 0,
-        z : 0
-    }
+    model: {objects: new THREE.Object3D(), motion: 'stand', state: 'stand'},
+    position: {x: 0, y: 0, z: 0, direction: 0},
+    camera: {speed: 500, distance: thirdPersonCameraDistance, x: 0, y: 0, z: 0}
 }
 
 /** @type {Object} The universe time */
@@ -47,9 +37,18 @@ var scene;
 /** @type {Object} The renderer engine */
 var renderer;
 
-/** @type {number} Conversion ratio from degrees to radians */
+/**
+ * Conversion ratio from degrees to radians
+ * @type {number}
+ * @const
+ */
 var deg2rad = Math.PI / 180;
 
+/**
+ * List of keyboard codes.
+ * @type {Object.<string, number>}
+ * @const
+ */
 var keyboard = {
     escape: 27,
     space: 32,
@@ -105,11 +104,15 @@ var md2frames = {
         boom    : [198, 198,  5]
 };
 
-var mouse = {x : 0, y : 0};
-var pointer = {x : 0, y : 0};
-var oldPointer = {x : 0, y : 0};
+var mouse = {x: 0, y: 0};
+var pointer = {x: 0, y: 0};
+var oldPointer = {x: 0, y: 0};
 
 
+/**
+ * Controls triggered when a keyboard key is pressed.
+ * @param {KeyboardEvent} e
+ */
 function keydownControls(e) {
 
     if (e.keyCode === keyboard.f) {
@@ -141,8 +144,6 @@ function keydownControls(e) {
     }
     else return;
 
-    //document.title = e.keyCode;    
-
     if (!moveState.moving) {
         if (player.model.state === 'stand') changeMotion('run');
         if (player.model.state === 'crstand') changeMotion('crwalk');
@@ -156,6 +157,10 @@ function keydownControls(e) {
 }
 
 
+/**
+ * Controls triggered when a keyboard key is released.
+ * @param {KeyboardEvent} e
+ */
 function keyupControls(e) {
 
     if (e.keyCode === keyboard.z || e.keyCode === keyboard.up) moveState.front = false;
@@ -171,7 +176,8 @@ function keyupControls(e) {
 }
 
 /**
- * @param {mouseEvent} e
+ * Controls triggered when the mouse position changes within the window.
+ * @param {MouseEvent} e
  */
 function mousemoveControls(e) {
 
@@ -191,7 +197,6 @@ function mousemoveControls(e) {
     moveState.angle = (player.camera.x / 2) % 360;
 
     oldPointer = {x: pointer.x, y: pointer.y};
-
 }
 
 var direction;
@@ -274,13 +279,13 @@ function animate() {
         var isEndFleame = (md2frames[player.model.motion][1] === md2meshBody.currentKeyframe);
         var isAction = md2frames[player.model.motion][3].action;
         
-        if(!isAction || (isAction && !isEndFleame)){
+        if (!isAction || (isAction && !isEndFleame)){
             md2meshBody.updateAnimation(1000 * delta);
-        }else if(/freeze/.test(md2frames[player.model.motion][3].state)){
-            //dead...
-        }else{
-            changeMotion(player.model.state);
         }
+        else if(/freeze/.test(md2frames[player.model.motion][3].state)){
+            //dead...
+        }
+        else changeMotion(player.model.state);
     }
     
     renderer.render( scene, camera );
@@ -307,7 +312,8 @@ window.addEventListener('DOMContentLoaded', function(){
 
     clock = new THREE.Clock();
 
-    scene = new THREE.Scene();
+    scene = new Physijs.Scene;
+    //scene.setGravity(new THREE.Vector3(0, -9.81, 0));
 
     // Initialize renderer engine
     renderer = new THREE.WebGLRenderer({antialias: true});
@@ -366,8 +372,8 @@ window.addEventListener('DOMContentLoaded', function(){
     
     // Add cubes
     var meshArray = [];
-    var geometry = new THREE.CubeGeometry( 1, 1, 1 );
-    for( var i = 0; i < 100; i++ ){
+    var geometry = new THREE.CubeGeometry(1, 1, 1);
+    for(var i = 0; i < 100; i++){
 
         meshArray[i] = new THREE.Mesh(geometry,
                                       new THREE.MeshLambertMaterial({
@@ -395,15 +401,15 @@ window.addEventListener('DOMContentLoaded', function(){
 
     loader = new THREE.JSONLoader();
 
-    loader.load( 'js/droid.js', function( geometry ) {
-        md2meshBody = new THREE.MorphAnimMesh( geometry, material );
+    loader.load( 'js/droid.js', function(geometry) {
+        md2meshBody = new THREE.MorphAnimMesh(geometry, material);
         md2meshBody.rotation.y = -Math.PI / 2;
         md2meshBody.scale.set(.02, .02, .02);
         md2meshBody.position.y = .5;
         md2meshBody.castShadow = true;
         md2meshBody.receiveShadow = true;
         changeMotion('stand');
-        player.model.objects.add( md2meshBody );
+        player.model.objects.add(md2meshBody);
         console.log(player.model.objects)
     } );
 
@@ -411,5 +417,5 @@ document.addEventListener('keydown', keydownControls);
 document.addEventListener('keyup', keyupControls);
 document.addEventListener('mousemove', mousemoveControls);        
 
-}, false);</script>
-</head><body></body></html>
+}, false);
+</script></head><body></body></html>

@@ -184,13 +184,13 @@ function mousemoveControls(e) {
     player.camera.x += (oldPointer.x - pointer.x) * player.camera.speed;
     player.camera.y += (oldPointer.y - pointer.y) * player.camera.speed;
 
+    // Bound azimutal camera rotation
     if (player.camera.y > 160) player.camera.y = 160; 
     else if (player.camera.y < -15) player.camera.y = -15;
         
     moveState.angle = (player.camera.x / 2) % 360;
-        
-    oldPointer.x = pointer.x;
-    oldPointer.y = pointer.y;
+
+    oldPointer = {x: pointer.x, y: pointer.y};
 
 }
 
@@ -225,7 +225,7 @@ function move() {
         else direction = 0;
     }
 
-    direction += player.camera.y;
+    direction += player.camera.x / 2;
     
     player.model.objects.rotation.y = direction * deg2rad;
     player.position.x -= Math.sin(direction * deg2rad) * speed;

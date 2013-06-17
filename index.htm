@@ -56,6 +56,9 @@ var scene;
 /** @type {Object} The renderer engine */
 var renderer;
 
+/** @type {number} Conversion ratio from degrees to radians */
+var deg2rad = Math.PI / 180;
+
 // When html is fully loaded :
 window.addEventListener('DOMContentLoaded', function(){
 
@@ -198,20 +201,68 @@ window.addEventListener('DOMContentLoaded', function(){
 
 
 var keyboard = {
-    c: 67
+    escape: 27,
+    space: 32,
+    c: 67,
+    d: 68,
+    e: 69,
+    f: 70,
+    q: 81,
+    s: 83,
+    z: 90
 };
 
-function keyboardControls(e) {
+function keydownControls(e) {
 
     if (e.keyCode === keyboard.c) {
         if (player.model.state === 'stand') changeMotion('crstand');
-        else if(player.model.state === 'crstand') changeMotion('stand');
+        else if (player.model.state === 'crstand') changeMotion('stand');
+    }
+    else if (e.keyCode === keyboard.z) {
+        moveState.front = true;
+        moveState.Backwards = false;
+    }
+    else if (e.keyCode === keyboard.s) {
+        moveState.Backwards = true;
+        moveState.front = false;
+    }
+    else if (e.keyCode === keyboard.q) {
+        moveState.left = true;
+        moveState.right = false;
+    }
+    else if (e.keyCode === keyboard.d) {
+        moveState.right = true;
+        moveState.left = false;
+    }
+
+    if (!moveState.moving) {
+        if (player.model.state === 'stand') changeMotion('run');
+        if (player.model.state === 'crstand') changeMotion('crwalk');
+        
+        moveState.moving = true;
+        move();
+        timer = setInterval(function(){move();}, 1000 / 60);
     }
 }
 
 
-document.addEventListener('keydown', keyboardControls);
+function keyupControls(e) {
 
+    if (e.keyCode === keyboard.q) moveState.front = false;
+    else if (e.keyCode === keyboard.s) moveState.Backwards = false;
+    else if (e.keyCode === keyboard.q) moveState.left = false;
+    else if (e.keyCode === keyboard.d) moveState.right = false;
+
+    if (!moveState.front && !moveState.Backwards && !moveState.left && !moveState.right) {
+        changeMotion(player.model.state);
+        moveState.moving = false;
+        clearInterval(timer);
+    }
+}
+
+
+document.addEventListener('keydown', keydownControls);
+document.addEventListener('keyup', keyupControls);
 
     
 /**
@@ -229,78 +280,41 @@ document.addEventListener('keydown', keyboardControls);
     
     function move(){
 
-        if(player.model.motion !== 'run' && player.model.state === 'stand'){
+        if (player.model.motion !== 'run' && player.model.state === 'stand') {
             changeMotion('run');
         }
-        if(player.model.motion !== 'crwalk' && player.model.state === 'crstand'){
+        else if (player.model.motion !== 'crwalk' && player.model.state === 'crstand') {
             changeMotion('crwalk');
         }
+
         var speed = moveState.speed;
-        if(player.model.state === 'crstand'){speed *= .5;}
-        if(player.model.state === 'freeze') {speed *= 0;}
+        if (player.model.state === 'crstand') speed *= .5;
+        if (player.model.state === 'freeze') speed = 0;
         
         var direction = moveState.angle;
-        if( moveState.front && !moveState.left && !moveState.Backwards && !moveState.right){direction +=   0}
-        if( moveState.front &&  moveState.left && !moveState.Backwards && !moveState.right){direction +=  45}
-        if(!moveState.front &&  moveState.left && !moveState.Backwards && !moveState.right){direction +=  90}
-        if(!moveState.front &&  moveState.left &&  moveState.Backwards && !moveState.right){direction += 135}
-        if(!moveState.front && !moveState.left &&  moveState.Backwards && !moveState.right){direction += 180}
-        if(!moveState.front && !moveState.left &&  moveState.Backwards &&  moveState.right){direction += 225}
-        if(!moveState.front && !moveState.left && !moveState.Backwards &&  moveState.right){direction += 270}
-        if( moveState.front && !moveState.left && !moveState.Backwards &&  moveState.right){direction += 315}
+
+        if (moveState.front) {
+            if (moveState.left) direction = 45;
+            else if (moveState.right) direction = 315;
+            else direction = 0;
+        }
+        else if (moveState.Backwards) {
+            if (moveState.left) direction = 135;
+            else if (moveState.right) direction = 270;
+            else direction = 180;
+        }
+        else {
+            if (moveState.left) direction = 90;
+            else if (moveState.right) direction = 270;
+            else direction = 225;
+        }
         
-        player.model.objects.rotation.y = direction * Math.PI / 180;
-        player.position.x -= Math.sin(direction * Math.PI / 180) * speed;
-        player.position.z -= Math.cos(direction * Math.PI / 180) * speed;
+        player.model.objects.rotation.y = direction * deg2rad;
+        player.position.x -= Math.sin(direction * deg2rad) * speed;
+        player.position.z -= Math.cos(direction * deg2rad) * speed;
     }
     
-    var timer;
-    document.addEventListener('keydown', function(e){
-        if( !/65|68|83|87/.test(e.keyCode)){ return }
-        if( e.keyCode === 87 ){
-            moveState.front     = true;
-            moveState.Backwards = false;
-        } else if ( e.keyCode === 83 ){
-            moveState.Backwards = true;
-            moveState.front     = false;
-        } else if ( e.keyCode === 65 ){
-            moveState.left  = true;
-            moveState.right = false;
-        } else if ( e.keyCode === 68 ){
-            moveState.right = true;
-            moveState.left  = false;
-        }
-        if(!moveState.moving){
-            if(player.model.state === 'stand')  {changeMotion('run');}
-            if(player.model.state === 'crstand'){changeMotion('crwalk');}
-            moveState.moving = true;
-            move();
-            timer = setInterval( function(){
-                move();
-            }, 1000 / 60);
-        }
-    }, false);
-    
-    document.addEventListener('keyup', function(e){
-        if( !/65|68|83|87/.test(e.keyCode)){ return }
-        if( e.keyCode === 87 ){
-            moveState.front = false;
-        } else if ( e.keyCode === 83 ){
-            moveState.Backwards = false;
-        } else if ( e.keyCode === 65 ){
-            moveState.left = false;
-        } else if ( e.keyCode === 68 ){
-            moveState.right = false;
-        }
-        if(!moveState.front && !moveState.Backwards && !moveState.left && !moveState.right){
-            changeMotion(player.model.state);
-            moveState.moving = false;
-            clearInterval(timer);
-        }
-    }, false);
-    
-    
-    
+    var timer; 
     
 /**
  * camera rotation
@@ -364,12 +378,12 @@ document.addEventListener('keydown', keyboardControls);
         player.model.objects.position.z = player.position.z;
         
         // camera rotate x
-        camera.position.x = player.position.x + player.camera.distance * Math.sin( (player.camera.x) * Math.PI / 360 );
-        camera.position.z = player.position.z + player.camera.distance * Math.cos( (player.camera.x) * Math.PI / 360 );
+        camera.position.x = player.position.x + player.camera.distance * Math.sin( (player.camera.x) * deg2rad / 2 );
+        camera.position.z = player.position.z + player.camera.distance * Math.cos( (player.camera.x) * deg2rad / 2 );
         
         //camera rotate y
         //camera.position.x = player.position.x + player.camera.distance * Math.cos( (player.camera.y) * Math.PI / 360 );
-        camera.position.y = player.position.y + player.camera.distance * Math.sin( (player.camera.y) * Math.PI / 360 );
+        camera.position.y = player.position.y + player.camera.distance * Math.sin( (player.camera.y) * deg2rad / 2 );
         //camera.position.z = player.position.z + player.camera.distance * Math.cos( (player.camera.y) * Math.PI / 360 );
         
         camera.position.y += 1;

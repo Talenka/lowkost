@@ -9,29 +9,55 @@ canvas{position:absolute;top:0;left:0;cursor:none}</style>
 
 // "use strict";
 
+// Web worker separate the physics and the display, to run both smoothly.
 Physijs.scripts.worker = "js/physijs_worker.js";
+
+// Ammo is the physical engine
 Physijs.scripts.ammo = "ammo.js";
 
-/** @type {Object} The player */
+/**
+ * The player
+ * @type {Object}
+ */
 var player = {
     model: {objects: new THREE.Object3D(), motion: 'stand', state: 'stand'},
     position: {x: 0, y: 0, z: 0, direction: 0},
-    camera: {speed: 500, distance: thirdPersonCameraDistance, x: 0, y: 0, z: 0}
+    camera: {speed: 500, distance: thirdPersonCameraDistance, x: 0, y: 0, z: 0},
+
+    // Custom properties
+    physicalShape: false,
+    modelHeight: 1.2,
+    modelRadius: 0.3,
 }
 
-/** @type {Object} The universe time */
+/**
+ * The universe time
+ * @type {Object}
+ */
 var clock;
 
-/** @type {number} Window's width in pixel */
+/**
+ * Window's width in pixel
+ * @type {number
+ */
 var width;
 
-/** @type {number} Window's height in pixel */
+/**
+ * Window's height in pixel
+ * @type {number}
+ */
 var height;
 
-/** @type {Object} The scene with physics */
+/**
+ * The scene with physics
+ * @type {Object}
+ */
 var scene;
 
-/** @type {Object} The renderer engine */
+/**
+ * The renderer engine
+ * @type {Object}
+ */
 var renderer;
 
 /**
@@ -143,8 +169,12 @@ function animate() {
                                      z: player.position.z};
 
     // We update the physical shape's position
-    if (player.physicalShape)
-        player.physicalShape.position = player.model.objects.position;
+    if (player.physicalShape) {
+        player.physicalShape.position.x = player.position.x;
+        player.physicalShape.position.y = player.position.y + player.modelHeight / 2;
+        player.physicalShape.position.z = player.position.z;
+    }
+        
     
     // camera rotate x
     camera.position.x = player.position.x +
@@ -196,6 +226,12 @@ var getElementPosition = function(element) {
     }
     while (element);
     return {top: top, left: left};
+}
+
+
+function playerCollision(collided, velocity, momentum) {
+    console.log(velocity);
+    //player.physicalShape     
 }
 
 
@@ -319,15 +355,23 @@ window.addEventListener('DOMContentLoaded', function() {
 
     // Now that we have the droid model, we have to bind it to a physical shape
     // in order to manage collision and jumps, for example.
-    // The shape is simply a cylender
-    var droidPhysicalShape = new Physijs.BoxMesh(
-                                new THREE.CylinderGeometry(0.3, 0.3, 1.2, 16, 4, false),
-                                new THREE.LineBasicMaterial({opacity: 0.31, color: 0xff0000, transparent: true}));
-    droidPhysicalShape.position.y = 0.6;
-    player.physicalShape = droidPhysicalShape;
-    scene.add(droidPhysicalShape);
+    // The shape is simply a cylinder
+    player.physicalShape = new Physijs.BoxMesh(
+                                new THREE.CylinderGeometry(player.modelRadius,
+                                                           player.modelRadius,
+                                                           player.modelHeight,
+                                                           16, 4, false),
+                                new THREE.MeshLambertMaterial({opacity: 0.31,
+                                                             color: 0xffffff,
+                                                             transparent: true}), 1);
 
-    // Start listening to user controls
+    player.physicalShape.position.y = player.modelHeight / 2;
+
+    player.physicalShape.addEventListener("collision", playerCollision);
+
+    scene.add(player.physicalShape);
+
+    // Start listening to user's controls
     document.addEventListener('keydown', keydownControls);
     document.addEventListener('keyup', keyupControls);
     document.addEventListener('mousemove', mousemoveControls);        

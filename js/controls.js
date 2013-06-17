@@ -99,8 +99,11 @@ function mousemoveControls(e) {
 function keydownControls(e) {
 
     if (e.keyCode === keyboard.space) {
-        changeMotion('jump');
-        player.position.y++;
+        
+        if (player.model.state === 'stand') {
+            changeMotion('jump');
+            player.position.y += player.modelHeight / 2;
+        }
     }
 
     if (e.keyCode === keyboard.f) {
@@ -111,7 +114,8 @@ function keydownControls(e) {
                                  thirdPersonCameraDistance;
 
     }
-    else if (e.keyCode === keyboard.c) {
+    
+    if (e.keyCode === keyboard.c) {
         if (player.model.state === 'stand') changeMotion('crstand');
         else if (player.model.state === 'crstand') changeMotion('stand');
     }

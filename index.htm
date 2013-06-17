@@ -86,16 +86,9 @@ var md2frames = {
         boom    : [198, 198,  5]
 };
 
-var mouse = {x: 0, y: 0};
-var pointer = {x: 0, y: 0};
-var oldPointer = {x: 0, y: 0};
-
-
-
-
-
 
 var direction;
+
 
 function move() {
 
@@ -143,16 +136,16 @@ function changeMotion(motion) {
     var animFps = md2frames[motion][2];
 
     md2meshBody.time = 0;
-    md2meshBody.duration = 1000 * (( animMax - animMin ) / animFps);
+    md2meshBody.duration = 1000 * ((animMax - animMin) / animFps);
     md2meshBody.setFrameRange(animMin, animMax);
 }
 
 function animate() {
-    requestAnimationFrame( animate );
-    
-    player.model.objects.position.x = player.position.x;
-    player.model.objects.position.y = player.position.y;
-    player.model.objects.position.z = player.position.z;
+    requestAnimationFrame(animate);
+
+    player.model.objects.position = {x: player.position.x,
+                                     y: player.position.y,
+                                     z: player.position.z};
     
     // camera rotate x
     camera.position.x = player.position.x +
@@ -174,7 +167,9 @@ function animate() {
     
     // model animation
     var delta = clock.getDelta();
+
     if (md2meshBody) {
+
         var isEndFleame = (md2frames[player.model.motion][1] === md2meshBody.currentKeyframe);
         var isAction = md2frames[player.model.motion][3].action;
         
@@ -187,7 +182,9 @@ function animate() {
         else changeMotion(player.model.state);
     }
     
-    renderer.render( scene, camera );
+    renderer.render(scene, camera);
+
+    scene.simulate();
 }
 
 

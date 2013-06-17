@@ -22,6 +22,15 @@ var keyboard = {
 };
 
 
+var mouse = {x: 0, y: 0};
+
+
+var pointer = {x: 0, y: 0};
+
+
+var oldPointer = {x: 0, y: 0};
+
+
 /**
  * Controls triggered when the mouse position changes within the window.
  * @param {MouseEvent} e
@@ -81,6 +90,7 @@ function keydownControls(e) {
         moveState.left = false;
     }
     else return;
+
 
     if (!moveState.moving) {
         if (player.model.state === 'stand') changeMotion('run');

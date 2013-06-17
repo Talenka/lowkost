@@ -246,7 +246,9 @@ window.addEventListener('DOMContentLoaded', function() {
     planeMaterial.map.repeat.y = 300;
     planeMaterial.map.wrapS = THREE.RepeatWrapping;
     planeMaterial.map.wrapT = THREE.RepeatWrapping;
-    var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+    var plane = new Physijs.BoxMesh(planeGeometry, planeMaterial, 0);
+
     plane.castShadow = false;
     plane.receiveShadow = true;
     scene.add(plane);
@@ -285,7 +287,7 @@ window.addEventListener('DOMContentLoaded', function() {
     }
 
 /**
- * load md2 model
+ * load the md2 droid model
  */
 
     material = new THREE.MeshLambertMaterial({
@@ -307,7 +309,7 @@ window.addEventListener('DOMContentLoaded', function() {
         md2meshBody.receiveShadow = true;
         changeMotion('stand');
         player.model.objects.add(md2meshBody);
-        console.log(player.model.objects)
+        // console.log(player.model.objects)
     } );
 
 document.addEventListener('keydown', keydownControls);

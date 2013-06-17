@@ -272,17 +272,18 @@ window.addEventListener('DOMContentLoaded', function() {
     
     // Add cubes
     var meshArray = [];
-    var geometry = new THREE.CubeGeometry(1, 1, 1);
 
-    for (var i = 0; i < 100; i++){
+    for (var i = 0; i < 50; i++){
 
-        meshArray[i] = new Physijs.BoxMesh(geometry,
-                                      new THREE.MeshLambertMaterial({
+        meshArray[i] = new Physijs.BoxMesh(
+                           new THREE.CubeGeometry(1 + Math.random(),
+                                                  Math.random(), 1),
+                           new THREE.MeshLambertMaterial({
                                         color: 0xffffff * Math.random()}));
 
         meshArray[i].position.x = i % 2 * 5 - 2.5;
-        meshArray[i].position.y = 1.5;
-        meshArray[i].position.z = -1 * i * 4;
+        meshArray[i].position.y = 10 * Math.random();
+        meshArray[i].position.z = -0.8 * i;
 
         meshArray[i].rotation.x = Math.random();
         meshArray[i].rotation.y = Math.random();

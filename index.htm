@@ -116,7 +116,7 @@ function keydownControls(e) {
         isCameraFirstPerson = !isCameraFirstPerson;
 
         player.camera.distance = isCameraFirstPerson ?
-                                 1 : thirdPersonCameraDistance;
+                                 .5 : thirdPersonCameraDistance;
 
     }
     else if (e.keyCode === keyboard.c) {
@@ -185,7 +185,7 @@ function mousemoveControls(e) {
     player.camera.y += (oldPointer.y - pointer.y) * player.camera.speed;
 
     if (player.camera.y > 160) player.camera.y = 160; 
-    if (player.camera.y < -10) player.camera.y = -10;
+    else if (player.camera.y < -15) player.camera.y = -15;
         
     moveState.angle = (player.camera.x / 2) % 360;
         
@@ -261,7 +261,7 @@ function animate() {
     
     camera.position.y += 1;
     
-    var vec3 = new THREE.Vector3( player.position.x,  player.position.y,  player.position.z)
+    var vec3 = new THREE.Vector3( player.position.x,  player.position.y + 1,  player.position.z)
     camera.lookAt( vec3 );
     
     // model animation

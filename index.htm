@@ -12,11 +12,6 @@ canvas{position:absolute;top:0;left:0;cursor:none}</style>
 Physijs.scripts.worker = "js/physijs_worker.js";
 Physijs.scripts.ammo = "ammo.js";
 
-/** @type {boolean} true/false : 1st/3rd person camera mode. */
-var isCameraFirstPerson = false;
-
-var thirdPersonCameraDistance = 5;
-
 /** @type {Object} The player */
 var player = {
     model: {objects: new THREE.Object3D(), motion: 'stand', state: 'stand'},

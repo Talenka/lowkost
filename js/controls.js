@@ -22,12 +22,48 @@ var keyboard = {
 };
 
 
+/**
+ * true/false : 1st/3rd person camera mode.
+ * @type {boolean}
+ */
+var isCameraFirstPerson = false;
+
+
+/**
+ * Distance betwenn camera and player in 1st person mode
+ * @type {number}
+ * @const
+ */
+var firstPersonCameraDistance = 0.5;
+
+
+/**
+ * Distance betwenn camera and player in 3rd person mode
+ * @type {number}
+ * @const
+ */
+var thirdPersonCameraDistance = 5;
+
+
+/**
+ * Mouse position
+ * @type {{x: number, y: number}}
+ */
 var mouse = {x: 0, y: 0};
 
 
+/**
+ * Pointer position in the scene
+  * @type {{x: number, y: number}}
+ */
 var pointer = {x: 0, y: 0};
 
 
+/**
+ * Previous pointer position in the scene
+ * (in the former iteration of the animation)
+  * @type {{x: number, y: number}}
+ */
 var oldPointer = {x: 0, y: 0};
 
 
@@ -62,11 +98,17 @@ function mousemoveControls(e) {
  */
 function keydownControls(e) {
 
+    if (e.keyCode === keyboard.space) {
+        changeMotion('jump');
+        player.setLinearVelocity(new THREE.Vector3(0, 10, 0));
+    }
+
     if (e.keyCode === keyboard.f) {
         isCameraFirstPerson = !isCameraFirstPerson;
 
         player.camera.distance = isCameraFirstPerson ?
-                                 .5 : thirdPersonCameraDistance;
+                                 firstPersonCameraDistance :
+                                 thirdPersonCameraDistance;
 
     }
     else if (e.keyCode === keyboard.c) {
@@ -103,7 +145,6 @@ function keydownControls(e) {
 
 
 }
-
 
 /**
  * Controls triggered when a keyboard key is released.

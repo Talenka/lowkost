@@ -97,7 +97,11 @@ window.addEventListener('DOMContentLoaded', function(){
 
     // Create the ground (grass field)
     var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
-    var planeMaterial = new THREE.MeshLambertMaterial({map: THREE.ImageUtils.loadTexture('images/grass.png'), color: 0xffffff});
+
+    var planeMaterial = new THREE.MeshLambertMaterial({
+        map: THREE.ImageUtils.loadTexture('images/grass.png'),
+        color: 0xffffff});
+
     planeMaterial.map.repeat.x = 300;
     planeMaterial.map.repeat.y = 300;
     planeMaterial.map.wrapS = THREE.RepeatWrapping;
@@ -126,7 +130,11 @@ window.addEventListener('DOMContentLoaded', function(){
     var meshArray = [];
     var geometry = new THREE.CubeGeometry( 1, 1, 1 );
     for( var i = 0; i < 100; i++ ){
-        meshArray[i] = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({color: 0xffffff * Math.random()}));
+
+        meshArray[i] = new THREE.Mesh(geometry,
+                                      new THREE.MeshLambertMaterial({
+                                        color: 0xffffff * Math.random()}));
+
         meshArray[i].position.x = i % 2 * 5 - 2.5;
         meshArray[i].position.y = .5;
         meshArray[i].position.z = -1 * i * 4;
@@ -140,30 +148,31 @@ window.addEventListener('DOMContentLoaded', function(){
  */
     var md2frames = {
         // first, last, fps
-        stand   : [   0,  39,  9, {state : 'stand',  action : false} ],   // STAND
-        run     : [  40,  45, 10, {state : 'stand',  action : false} ],   // RUN
-        attack  : [  46,  53, 10, {state : 'stand',  action : true}  ],   // ATTACK
-        pain1   : [  54,  57,  7, {state : 'stand',  action : true}  ],   // PAIN_A
-        pain2   : [  58,  61,  7, {state : 'stand',  action : true}  ],   // PAIN_B
-        pain3   : [  62,  65,  7, {state : 'stand',  action : true}  ],   // PAIN_C
-        jump    : [  66,  71,  7, {state : 'stand',  action : true}  ],   // JUMP
-        flip    : [  72,  83,  7, {state : 'stand',  action : true}  ],   // FLIP
-        salute  : [  84,  94,  7, {state : 'stand',  action : true}  ],   // SALUTE
-        taunt   : [  95, 111, 10, {state : 'stand',  action : true}  ],   // FALLBACK
-        wave    : [ 112, 122,  7, {state : 'stand',  action : true}  ],   // WAVE
-        point   : [ 123, 134,  6, {state : 'stand',  action : true}  ],   // POINT
-        crstand : [ 135, 153, 10, {state : 'crstand', action : false}],   // CROUCH_STAND
-        crwalk  : [ 154, 159,  7, {state : 'crstand', action : false}],   // CROUCH_WALK
-        crattack: [ 160, 168, 10, {state : 'crstand', action : true} ],   // CROUCH_ATTACK
-        crpain  : [ 196, 172,  7, {state : 'crstand', action : true} ],   // CROUCH_PAIN
-        crdeath : [ 173, 177,  5, {state : 'freeze', action : true} ],   // CROUCH_DEATH
-        death1  : [ 178, 183,  7, {state : 'freeze',  action : true}  ],   // DEATH_FALLBACK
-        death2  : [ 184, 189,  7, {state : 'freeze',  action : true}  ],   // DEATH_FALLFORWARD
-        death3  : [ 190, 197,  7, {state : 'freeze',  action : true}  ],   // DEATH_FALLBACKSLOW
-        //boom    : [ 198, 198,  5 ]    // BOOM
+        stand   : [  0,  39,  9, {state: 'stand', action: false}],
+        run     : [ 40,  45, 10, {state: 'stand', action: false}],
+        attack  : [ 46,  53, 10, {state: 'stand', action: true}],
+        pain1   : [ 54,  57,  7, {state: 'stand', action: true}],
+        pain2   : [ 58,  61,  7, {state: 'stand', action: true}],
+        pain3   : [ 62,  65,  7, {state: 'stand', action: true}],
+        jump    : [ 66,  71,  7, {state: 'stand', action: true}],
+        flip    : [ 72,  83,  7, {state: 'stand', action: true}],
+        salute  : [ 84,  94,  7, {state: 'stand', action: true}],
+        taunt   : [ 95, 111, 10, {state: 'stand', action: true}],
+        wave    : [112, 122,  7, {state: 'stand', action: true}],
+        point   : [123, 134,  6, {state: 'stand', action: true}],
+        crstand : [135, 153, 10, {state: 'crstand', action: false}],
+        crwalk  : [154, 159,  7, {state: 'crstand', action: false}],
+        crattack: [160, 168, 10, {state: 'crstand', action: true}],
+        crpain  : [196, 172,  7, {state: 'crstand', action: true}],
+        crdeath : [173, 177,  5, {state: 'freeze', action: true}],
+        death1  : [178, 183,  7, {state: 'freeze', action: true}],
+        death2  : [184, 189,  7, {state: 'freeze', action: true}],
+        death3  : [190, 197,  7, {state: 'freeze', action: true}],
+        boom    : [198, 198,  5]
     }
 
-    function changeMotion(motion){
+    function changeMotion(motion) {
+
         player.model.motion = motion;
         player.model.state = md2frames[motion][3].state;
         
@@ -173,17 +182,18 @@ window.addEventListener('DOMContentLoaded', function(){
 
         md2meshBody.time = 0;
         md2meshBody.duration = 1000 * (( animMax - animMin ) / animFps);
-        md2meshBody.setFrameRange( animMin, animMax );
+        md2meshBody.setFrameRange(animMin, animMax);
     }
     
     var md2meshBody;
 
-    var material = new THREE.MeshLambertMaterial({map: THREE.ImageUtils.loadTexture('images/1.png'),
-                                                  ambient: 0x999999,
-                                                  color: 0xffffff,
-                                                  specular: 0xffffff,
-                                                  shininess: 25,
-                                                  morphTargets: true});
+    var material = new THREE.MeshLambertMaterial({
+        map: THREE.ImageUtils.loadTexture('images/1.png'),
+        ambient: 0x999999,
+        color: 0xffffff,
+        specular: 0xffffff,
+        shininess: 25,
+        morphTargets: true});
 
     var loader = new THREE.JSONLoader();
 
@@ -382,6 +392,7 @@ document.addEventListener('keyup', keyupControls);
         camera.position.z = player.position.z + player.camera.distance * Math.cos( (player.camera.x) * deg2rad / 2 );
         
         //camera rotate y
+
         //camera.position.x = player.position.x + player.camera.distance * Math.cos( (player.camera.y) * Math.PI / 360 );
         camera.position.y = player.position.y + player.camera.distance * Math.sin( (player.camera.y) * deg2rad / 2 );
         //camera.position.z = player.position.z + player.camera.distance * Math.cos( (player.camera.y) * Math.PI / 360 );

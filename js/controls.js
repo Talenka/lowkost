@@ -83,7 +83,7 @@ function mousemoveControls(e) {
     player.camera.y += (oldPointer.y - pointer.y) * player.camera.speed;
 
     // Bound azimutal camera rotation
-    if (player.camera.y > 160) player.camera.y = 160; 
+    if (player.camera.y > 160) player.camera.y = 160;
     else if (player.camera.y < -15) player.camera.y = -15;
         
     moveState.angle = (player.camera.x / 2) % 360;
@@ -100,7 +100,7 @@ function keydownControls(e) {
 
     if (e.keyCode === keyboard.space) {
         changeMotion('jump');
-        player.setLinearVelocity(new THREE.Vector3(0, 10, 0));
+        player.position.y++;
     }
 
     if (e.keyCode === keyboard.f) {

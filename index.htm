@@ -141,6 +141,10 @@ function animate() {
     player.model.objects.position = {x: player.position.x,
                                      y: player.position.y,
                                      z: player.position.z};
+
+    // We update the physical shape's position
+    if (player.physicalShape)
+        player.physicalShape.position = player.model.objects.position;
     
     // camera rotate x
     camera.position.x = player.position.x +
@@ -266,6 +270,7 @@ window.addEventListener('DOMContentLoaded', function() {
     animate();
     
     // Add cubes
+
     var meshArray = [];
 
     for (var i = 0; i < 50; i++){
@@ -289,11 +294,9 @@ window.addEventListener('DOMContentLoaded', function() {
         scene.add(meshArray[i]);
     }
 
-/**
- * load the md2 droid model
- */
+    // Load the md2 droid model
 
-    material = new THREE.MeshLambertMaterial({
+    droidMaterial = new THREE.MeshLambertMaterial({
         map: THREE.ImageUtils.loadTexture('images/1.png'),
         ambient: 0x999999,
         color: 0xffffff,
@@ -304,7 +307,7 @@ window.addEventListener('DOMContentLoaded', function() {
     loader = new THREE.JSONLoader();
 
     loader.load('js/droid.js', function(geometry) {
-        md2meshBody = new THREE.MorphAnimMesh(geometry, material);
+        md2meshBody = new THREE.MorphAnimMesh(geometry, droidMaterial);
         md2meshBody.rotation.y = -Math.PI / 2;
         md2meshBody.scale.set(.02, .02, .02);
         md2meshBody.position.y = .5;
@@ -312,12 +315,22 @@ window.addEventListener('DOMContentLoaded', function() {
         md2meshBody.receiveShadow = true;
         changeMotion('stand');
         player.model.objects.add(md2meshBody);
-        // console.log(player.model.objects)
-    } );
+    });
 
-document.addEventListener('keydown', keydownControls);
-document.addEventListener('keyup', keyupControls);
-document.addEventListener('mousemove', mousemoveControls);        
+    // Now that we have the droid model, we have to bind it to a physical shape
+    // in order to manage collision and jumps, for example.
+    // The shape is simply a cylender
+    var droidPhysicalShape = new Physijs.BoxMesh(
+                                new THREE.CylinderGeometry(0.3, 0.3, 1.2, 16, 4, false),
+                                new THREE.LineBasicMaterial({opacity: 0.31, color: 0xff0000, transparent: true}));
+    droidPhysicalShape.position.y = 0.6;
+    player.physicalShape = droidPhysicalShape;
+    scene.add(droidPhysicalShape);
+
+    // Start listening to user controls
+    document.addEventListener('keydown', keydownControls);
+    document.addEventListener('keyup', keyupControls);
+    document.addEventListener('mousemove', mousemoveControls);        
 
 }, false);
 </script></head><body></body></html>

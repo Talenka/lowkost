@@ -1,21 +1,14 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset=utf-8>
+<!DOCTYPE html><html><head><meta charset=utf-8>
 <style>
-body{
-    font-family:Arial, Helvetica, sans-serif;
-    background:#99f;
-}
-canvas{
-    position:absolute;
-    top:0;
-    left:0;
-    cursor: none
-}
-</style>
+body{background:#99f}
+canvas{position:absolute;top:0;left:0;cursor:none}</style>
 <script src="js/three.min.js"></script>
 <script>
+
+/** @type {boolean} true/false : 1st/3rd person camera mode. */
+var isCameraFirstPerson = false;
+
+var thirdPersonCameraDistance = 5;
 
 /** @type {Object} The player */
 var player = {
@@ -32,7 +25,7 @@ var player = {
     },
     camera : {
         speed : 300,
-        distance : 5,
+        distance : thirdPersonCameraDistance,
         x : 0,
         y : 0,
         z : 0
@@ -41,9 +34,6 @@ var player = {
 
 /** @type {Object} The universe time */
 var clock;
-
-/** @type {boolean} true/false : 1st/3rd person camera mode. */
-var isCameraFirstPerson = false;
 
 /** @type {number} Window's width in pixel */
 var width;
@@ -122,7 +112,14 @@ var oldPointer = {x : 0, y : 0};
 
 function keydownControls(e) {
 
-    if (e.keyCode === keyboard.c) {
+    if (e.keyCode === keyboard.f) {
+        isCameraFirstPerson = !isCameraFirstPerson;
+
+        player.camera.distance = isCameraFirstPerson ?
+                                 1 : thirdPersonCameraDistance;
+
+    }
+    else if (e.keyCode === keyboard.c) {
         if (player.model.state === 'stand') changeMotion('crstand');
         else if (player.model.state === 'crstand') changeMotion('stand');
     }
@@ -253,17 +250,16 @@ function animate() {
     player.model.objects.position.z = player.position.z;
     
     // camera rotate x
-    camera.position.x = player.position.x + player.camera.distance * Math.sin( (player.camera.x) * deg2rad / 2 );
-    camera.position.z = player.position.z + player.camera.distance * Math.cos( (player.camera.x) * deg2rad / 2 );
+    camera.position.x = player.position.x + player.camera.distance * Math.sin(player.camera.x * deg2rad/2);
+    camera.position.z = player.position.z + player.camera.distance * Math.cos(player.camera.x * deg2rad/2);
     
     //camera rotate y
 
     //camera.position.x = player.position.x + player.camera.distance * Math.cos( (player.camera.y) * Math.PI / 360 );
-    camera.position.y = player.position.y + player.camera.distance * Math.sin( (player.camera.y) * deg2rad / 2 );
+    camera.position.y = player.position.y + player.camera.distance * Math.sin(player.camera.y * deg2rad/2);
     //camera.position.z = player.position.z + player.camera.distance * Math.cos( (player.camera.y) * Math.PI / 360 );
     
     camera.position.y += 1;
-    //console.log(camera.position.z)
     
     var vec3 = new THREE.Vector3( player.position.x,  player.position.y,  player.position.z)
     camera.lookAt( vec3 );
@@ -412,16 +408,4 @@ document.addEventListener('keyup', keyupControls);
 document.addEventListener('mousemove', mousemoveControls);        
 
 }, false);</script>
-</head>
-<body>
-<div style="position:absolute; z-index:10; background:rgba(0,0,0,.5); padding:10px; color:#fff;">
-W key : foward<br>
-S key : backword<br>
-A key : left<br>
-D key : right<br>
-C key : toggle Crouch<br>
-<!--Enter key : chat<br>-->
-MouseDrag : rotate
-</div>
-</body>
-</html>
+</head><body></body></html>

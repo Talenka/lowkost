@@ -5,7 +5,7 @@
 <style>
 body{
     font-family:Arial, Helvetica, sans-serif;
-    background:#000;
+    background:#99f;
 }
 canvas{
     position:absolute;
@@ -15,6 +15,7 @@ canvas{
 </style>
 <script src="js/three.min.js"></script>
 <script>
+
 var player = {
     model : {       
         objects : new THREE.Object3D(),
@@ -36,65 +37,46 @@ var player = {
     }
 }
 
+/** @type {boolean} true/false : 1st/3rd person camera mode. */
+var isCameraFirstPerson = false;
+
+// When html is fully loaded :
 window.addEventListener('DOMContentLoaded', function(){
+
     var width = window.innerWidth;
     var height = window.innerHeight;
+
     var clock = new THREE.Clock();
 
     var scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000000, 0.05);
-    
-    scene.add( player.model.objects );
 
-    var camera = new THREE.PerspectiveCamera(40, width / height, 1, 1000);
-    scene.add( camera );
-    
-    var light = new THREE.DirectionalLight(0xffffff, 1.5);
-    light.position.set(1, 1, 1).normalize();
-    light.castShadow = true;
-    
-//  var light = new THREE.SpotLight( 0xffffff, 2 );
-//  light.position.set( 10, 10, 10 );
-//  light.target.position.set( 0, 0, 0 );
-//  light.castShadow = true;
-//  light.shadowCameraNear = camera.near;
-//  light.shadowCameraFar = camera.far;
-//  light.shadowCameraFov = camera.fov;
-//  light.shadowBias = 0.0001;
-//  light.shadowDarkness = 0.3;
-//  light.shadowMapWidth  = 1000;
-//  light.shadowMapHeight = 1000;
-    scene.add( light );
-    
-//  var light2 = new THREE.DirectionalLight( 0xffffff );
-//  light2.position.set( 1, 1, 1 ).normalize();
-//  scene.add( light2 );
-    
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize( width, height );
+    // Initialize renderer engine
+    renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.setSize(width, height);
+
+    // Activate shadows
     renderer.shadowMapEnabled = true;
     renderer.shadowMapSoft = true;
     
-//  renderer.shadowCameraNear = camera.near;
-//  renderer.shadowCameraFar = camera.far;
-//  renderer.shadowCameraFov = 50;
-//  renderer.shadowMapBias = 0.0039;
-//  renderer.shadowMapDarkness = 0.5;
-//  renderer.shadowMapWidth = 500;
-//  renderer.shadowMapHeight = 500; 
-    renderer.shadowMapEnabled = true;
-//  renderer.shadowMapSoft = true;
+    // Shadows options :
+    // renderer.shadowCameraNear = camera.near;
+    // renderer.shadowCameraFar = camera.far;
+    // renderer.shadowCameraFov = 50;
+    // renderer.shadowMapBias = 0.0039;
+    // renderer.shadowMapDarkness = 0.5;
+    // renderer.shadowMapWidth = 500;
+    // renderer.shadowMapHeight = 500; 
 
-    document.body.appendChild( renderer.domElement );
-    
-    animate();
+    document.body.appendChild(renderer.domElement);
 
-/**
- * create field
- */
- 
-    var planeGeometry = new THREE.PlaneGeometry(1000,1000);
-    var planeMaterial = new THREE.MeshLambertMaterial( { map: THREE.ImageUtils.loadTexture('images/grass.png'), color: 0xffffff } );
+    // Create the blue sky
+    scene.fog = new THREE.FogExp2(0x9999ff, 0.01);
+    var ambientLight = new THREE.AmbientLight(0x202020);
+    scene.add(ambientLight);
+
+    // Create the ground (grass field)
+    var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+    var planeMaterial = new THREE.MeshLambertMaterial({map: THREE.ImageUtils.loadTexture('images/grass.png'), color: 0xffffff});
     planeMaterial.map.repeat.x = 300;
     planeMaterial.map.repeat.y = 300;
     planeMaterial.map.wrapS = THREE.RepeatWrapping;
@@ -102,18 +84,34 @@ window.addEventListener('DOMContentLoaded', function(){
     var plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.castShadow = false;
     plane.receiveShadow = true;
-    scene.add( plane );
+    scene.add(plane);
+
+    // Initialize the camera
+    var camera = new THREE.PerspectiveCamera(40, width / height, 1, 1000);
+    scene.add(camera);
     
+    // Insert the player
+    scene.add(player.model.objects);
+
+    // Create sunlight
+    var sunlight = new THREE.DirectionalLight(0xfffffa, 1.5);
+    sunlight.position.set(1, 50, 1).normalize();
+    sunlight.castShadow = true;
+    scene.add(sunlight);
+    
+    animate();
+    
+    // Add cubes
     var meshArray = [];
     var geometry = new THREE.CubeGeometry( 1, 1, 1 );
     for( var i = 0; i < 100; i++ ){
-        meshArray[ i ] = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: 0xffffff * Math.random() } ) );
-        meshArray[ i ].position.x = i % 2 * 5 - 2.5;
-        meshArray[ i ].position.y = .5;
-        meshArray[ i ].position.z = -1 * i * 4;
-        meshArray[ i ].castShadow = true;
-        meshArray[ i ].receiveShadow = true;
-        scene.add( meshArray[i] );
+        meshArray[i] = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({color: 0xffffff * Math.random()}));
+        meshArray[i].position.x = i % 2 * 5 - 2.5;
+        meshArray[i].position.y = .5;
+        meshArray[i].position.z = -1 * i * 4;
+        meshArray[i].castShadow = true;
+        meshArray[i].receiveShadow = true;
+        scene.add(meshArray[i]);
     }
 
 /**
@@ -197,6 +195,7 @@ window.addEventListener('DOMContentLoaded', function(){
     }
     
     function move(){
+
         if(player.model.motion !== 'run' && player.model.state === 'stand'){
             changeMotion('run');
         }
@@ -369,7 +368,6 @@ window.addEventListener('DOMContentLoaded', function(){
 </head>
 <body>
 <div style="position:absolute; z-index:10; background:rgba(0,0,0,.5); padding:10px; color:#fff;">
-&#21322;&#35282;&#33521;&#25968;&#20837;&#21147;&#26178;&#12395;...<br>
 W key : foward<br>
 S key : backword<br>
 A key : left<br>

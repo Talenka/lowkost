@@ -81,7 +81,37 @@ var moveState = {
     angle     : 0
 }
 
-var camera, timer, md2meshBody, md2frames, loader, material;
+var camera, timer, md2meshBody, loader, material;
+
+var md2frames = {
+        // first, last, fps
+        stand   : [  0,  39,  9, {state: 'stand', action: false}],
+        run     : [ 40,  45, 10, {state: 'stand', action: false}],
+        attack  : [ 46,  53, 10, {state: 'stand', action: true}],
+        pain1   : [ 54,  57,  7, {state: 'stand', action: true}],
+        pain2   : [ 58,  61,  7, {state: 'stand', action: true}],
+        pain3   : [ 62,  65,  7, {state: 'stand', action: true}],
+        jump    : [ 66,  71,  7, {state: 'stand', action: true}],
+        flip    : [ 72,  83,  7, {state: 'stand', action: true}],
+        salute  : [ 84,  94,  7, {state: 'stand', action: true}],
+        taunt   : [ 95, 111, 10, {state: 'stand', action: true}],
+        wave    : [112, 122,  7, {state: 'stand', action: true}],
+        point   : [123, 134,  6, {state: 'stand', action: true}],
+        crstand : [135, 153, 10, {state: 'crstand', action: false}],
+        crwalk  : [154, 159,  7, {state: 'crstand', action: false}],
+        crattack: [160, 168, 10, {state: 'crstand', action: true}],
+        crpain  : [196, 172,  7, {state: 'crstand', action: true}],
+        crdeath : [173, 177,  5, {state: 'freeze', action: true}],
+        death1  : [178, 183,  7, {state: 'freeze', action: true}],
+        death2  : [184, 189,  7, {state: 'freeze', action: true}],
+        death3  : [190, 197,  7, {state: 'freeze', action: true}],
+        boom    : [198, 198,  5]
+};
+
+var mouse = {x : 0, y : 0};
+var pointer = {x : 0, y : 0};
+var oldPointer = {x : 0, y : 0};
+
 
 function keydownControls(e) {
 
@@ -105,6 +135,7 @@ function keydownControls(e) {
         moveState.right = true;
         moveState.left = false;
     }
+    else return;
 
     if (!moveState.moving) {
         if (player.model.state === 'stand') changeMotion('run');
@@ -131,7 +162,31 @@ function keyupControls(e) {
     }
 }
 
-function move(){
+/**
+ * @param {mouseEvent} e
+ */
+function mousemoveControls(e) {
+
+    mouse = {x: e.clientX - getElementPosition(renderer.domElement).left,
+             y: e.clientY - getElementPosition(renderer.domElement).top};
+
+    pointer.x =   (mouse.x / renderer.domElement.width) * 2 - 1;
+    pointer.y = - (mouse.y / renderer.domElement.height) * 2 + 1;
+
+    player.camera.x += (oldPointer.x - pointer.x) * player.camera.speed;
+    player.camera.y += (oldPointer.y - pointer.y) * player.camera.speed;
+
+    if (player.camera.y > 160) player.camera.y = 160; 
+    if (player.camera.y < -10) player.camera.y = -10;
+        
+    moveState.angle = (player.camera.x / 2) % 360;
+        
+    oldPointer.x = pointer.x;
+    oldPointer.y = pointer.y;
+
+}
+
+function move() {
 
     if (player.model.motion !== 'run' &&
         player.model.state === 'stand') changeMotion('run');
@@ -179,46 +234,58 @@ function changeMotion(motion) {
     md2meshBody.setFrameRange(animMin, animMax);
 }
 
-    function animate(){
-        requestAnimationFrame( animate );
-        
-        player.model.objects.position.x = player.position.x;
-        player.model.objects.position.y = player.position.y;
-        player.model.objects.position.z = player.position.z;
-        
-        // camera rotate x
-        camera.position.x = player.position.x + player.camera.distance * Math.sin( (player.camera.x) * deg2rad / 2 );
-        camera.position.z = player.position.z + player.camera.distance * Math.cos( (player.camera.x) * deg2rad / 2 );
-        
-        //camera rotate y
+function animate() {
+    requestAnimationFrame( animate );
+    
+    player.model.objects.position.x = player.position.x;
+    player.model.objects.position.y = player.position.y;
+    player.model.objects.position.z = player.position.z;
+    
+    // camera rotate x
+    camera.position.x = player.position.x + player.camera.distance * Math.sin( (player.camera.x) * deg2rad / 2 );
+    camera.position.z = player.position.z + player.camera.distance * Math.cos( (player.camera.x) * deg2rad / 2 );
+    
+    //camera rotate y
 
-        //camera.position.x = player.position.x + player.camera.distance * Math.cos( (player.camera.y) * Math.PI / 360 );
-        camera.position.y = player.position.y + player.camera.distance * Math.sin( (player.camera.y) * deg2rad / 2 );
-        //camera.position.z = player.position.z + player.camera.distance * Math.cos( (player.camera.y) * Math.PI / 360 );
+    //camera.position.x = player.position.x + player.camera.distance * Math.cos( (player.camera.y) * Math.PI / 360 );
+    camera.position.y = player.position.y + player.camera.distance * Math.sin( (player.camera.y) * deg2rad / 2 );
+    //camera.position.z = player.position.z + player.camera.distance * Math.cos( (player.camera.y) * Math.PI / 360 );
+    
+    camera.position.y += 1;
+    //console.log(camera.position.z)
+    
+    var vec3 = new THREE.Vector3( player.position.x,  player.position.y,  player.position.z)
+    camera.lookAt( vec3 );
+    
+    // model animation
+    var delta = clock.getDelta();
+    if (md2meshBody) {
+        var isEndFleame = (md2frames[player.model.motion][1] === md2meshBody.currentKeyframe);
+        var isAction = md2frames[player.model.motion][3].action;
         
-        camera.position.y += 1;
-        //console.log(camera.position.z)
-        
-        var vec3 = new THREE.Vector3( player.position.x,  player.position.y,  player.position.z)
-        camera.lookAt( vec3 );
-        
-        // model animation
-        var delta = clock.getDelta();
-        if (md2meshBody) {
-            var isEndFleame = (md2frames[player.model.motion][1] === md2meshBody.currentKeyframe);
-            var isAction = md2frames[player.model.motion][3].action;
-            
-            if(!isAction || (isAction && !isEndFleame)){
-                md2meshBody.updateAnimation(1000 * delta);
-            }else if(/freeze/.test(md2frames[player.model.motion][3].state)){
-                //dead...
-            }else{
-                changeMotion(player.model.state);
-            }
+        if(!isAction || (isAction && !isEndFleame)){
+            md2meshBody.updateAnimation(1000 * delta);
+        }else if(/freeze/.test(md2frames[player.model.motion][3].state)){
+            //dead...
+        }else{
+            changeMotion(player.model.state);
         }
-        
-        renderer.render( scene, camera );
     }
+    
+    renderer.render( scene, camera );
+}
+
+
+var getElementPosition = function(element) {
+    var top = left = 0;
+    do {
+        top  += element.offsetTop  || 0;
+        left += element.offsetLeft || 0;
+        element =  element.offsetParent;
+    }
+    while (element);
+    return {top: top, left: left};
+}
 
 
 // When html is fully loaded :
@@ -308,30 +375,6 @@ window.addEventListener('DOMContentLoaded', function(){
 /**
  * load md2 model
  */
-    md2frames = {
-        // first, last, fps
-        stand   : [  0,  39,  9, {state: 'stand', action: false}],
-        run     : [ 40,  45, 10, {state: 'stand', action: false}],
-        attack  : [ 46,  53, 10, {state: 'stand', action: true}],
-        pain1   : [ 54,  57,  7, {state: 'stand', action: true}],
-        pain2   : [ 58,  61,  7, {state: 'stand', action: true}],
-        pain3   : [ 62,  65,  7, {state: 'stand', action: true}],
-        jump    : [ 66,  71,  7, {state: 'stand', action: true}],
-        flip    : [ 72,  83,  7, {state: 'stand', action: true}],
-        salute  : [ 84,  94,  7, {state: 'stand', action: true}],
-        taunt   : [ 95, 111, 10, {state: 'stand', action: true}],
-        wave    : [112, 122,  7, {state: 'stand', action: true}],
-        point   : [123, 134,  6, {state: 'stand', action: true}],
-        crstand : [135, 153, 10, {state: 'crstand', action: false}],
-        crwalk  : [154, 159,  7, {state: 'crstand', action: false}],
-        crattack: [160, 168, 10, {state: 'crstand', action: true}],
-        crpain  : [196, 172,  7, {state: 'crstand', action: true}],
-        crdeath : [173, 177,  5, {state: 'freeze', action: true}],
-        death1  : [178, 183,  7, {state: 'freeze', action: true}],
-        death2  : [184, 189,  7, {state: 'freeze', action: true}],
-        death3  : [190, 197,  7, {state: 'freeze', action: true}],
-        boom    : [198, 198,  5]
-    }
 
     material = new THREE.MeshLambertMaterial({
         map: THREE.ImageUtils.loadTexture('images/1.png'),
@@ -357,64 +400,7 @@ window.addEventListener('DOMContentLoaded', function(){
 
 document.addEventListener('keydown', keydownControls);
 document.addEventListener('keyup', keyupControls);
-    
-/**
- * camera rotation
- */
-    var getElementPosition = function(element) {
-        var top = left = 0;
-        do {
-            top  += element.offsetTop  || 0;
-            left += element.offsetLeft || 0;
-            element =  element.offsetParent;
-        }
-        while (element);
-        return {top: top, left: left};
-    }
-    
-    var pointer = {x : 0, y : 0};
-    document.addEventListener('mousemove', function(e){
-        var mouseX = e.clientX - getElementPosition(renderer.domElement).left;
-        var mouseY = e.clientY - getElementPosition(renderer.domElement).top;
-        pointer.x =   (mouseX / renderer.domElement.width) * 2 - 1;
-        pointer.y = - (mouseY / renderer.domElement.height) * 2 + 1;
-    }, false);
-    
-    var oldPointerX = oldPointerY = 0;
-    document.addEventListener('mousedown', rotateStart, false);
-
-    function rotateStart() {
-        oldPointerX = pointer.x;
-        oldPointerY = pointer.y;
-        renderer.domElement.addEventListener('mousemove', rotate, false);
-        renderer.domElement.addEventListener('mouseup', rotateStop, false);
-    }
-
-    function rotateStop() {
-        renderer.domElement.removeEventListener('mousemove', rotate, false);
-        renderer.domElement.removeEventListener('mouseup', rotateStop, false);
-    }
-
-    function rotate(){
-        player.camera.x += (oldPointerX - pointer.x) * player.camera.speed;
-        player.camera.y += (oldPointerY - pointer.y) * player.camera.speed;
-        if(player.camera.y > 150){
-            player.camera.y = 150;
-        }
-        if(player.camera.y < -150){
-            player.camera.y = -150;
-        }
-        
-        moveState.angle = (player.camera.x / 2) % 360;
-        
-        oldPointerX = pointer.x;
-        oldPointerY = pointer.y;
-    }
-    
-    
-/**
- * render
- */        
+document.addEventListener('mousemove', mousemoveControls);        
 
 }, false);</script>
 </head>

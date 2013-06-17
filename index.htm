@@ -194,6 +194,8 @@ function mousemoveControls(e) {
 
 }
 
+var direction;
+
 function move() {
 
     if (player.model.motion !== 'run' &&
@@ -205,7 +207,7 @@ function move() {
     if (player.model.state === 'crstand') speed *= .5;
     if (player.model.state === 'freeze') speed = 0;
     
-    var direction = moveState.angle;
+    direction = moveState.angle;
 
     if (moveState.front) {
         if (moveState.left) direction = 45;
@@ -222,6 +224,8 @@ function move() {
         else if (moveState.right) direction = 270;
         else direction = 0;
     }
+
+    direction += player.camera.y;
     
     player.model.objects.rotation.y = direction * deg2rad;
     player.position.x -= Math.sin(direction * deg2rad) * speed;

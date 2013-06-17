@@ -11,6 +11,7 @@ canvas{
     position:absolute;
     top:0;
     left:0;
+    cursor: none
 }
 </style>
 <script src="js/three.min.js"></script>
@@ -62,13 +63,17 @@ var deg2rad = Math.PI / 180;
 var keyboard = {
     escape: 27,
     space: 32,
+    left: 37,
+    up: 38,
+    right: 39,
+    down: 40,
     c: 67,
     d: 68,
     e: 69,
     f: 70,
     q: 81,
     s: 83,
-    z: 90
+    z: 90,
 };
 
 var moveState = {
@@ -81,7 +86,9 @@ var moveState = {
     angle     : 0
 }
 
-var camera, timer, md2meshBody, loader, material;
+var camera, timer, loader, material;
+
+var md2meshBody;
 
 var md2frames = {
         // first, last, fps
@@ -119,23 +126,25 @@ function keydownControls(e) {
         if (player.model.state === 'stand') changeMotion('crstand');
         else if (player.model.state === 'crstand') changeMotion('stand');
     }
-    else if (e.keyCode === keyboard.z) {
+    else if (e.keyCode === keyboard.z || e.keyCode === keyboard.up) {
         moveState.front = true;
         moveState.Backwards = false;
     }
-    else if (e.keyCode === keyboard.s) {
+    else if (e.keyCode === keyboard.s || e.keyCode === keyboard.down) {
         moveState.Backwards = true;
         moveState.front = false;
     }
-    else if (e.keyCode === keyboard.q) {
+    else if (e.keyCode === keyboard.q || e.keyCode === keyboard.left) {
         moveState.left = true;
         moveState.right = false;
     }
-    else if (e.keyCode === keyboard.d) {
+    else if (e.keyCode === keyboard.d || e.keyCode === keyboard.right) {
         moveState.right = true;
         moveState.left = false;
     }
     else return;
+
+    //document.title = e.keyCode;    
 
     if (!moveState.moving) {
         if (player.model.state === 'stand') changeMotion('run');
@@ -145,15 +154,17 @@ function keydownControls(e) {
         move();
         timer = setInterval(function(){move();}, 1000 / 60);
     }
+
+
 }
 
 
 function keyupControls(e) {
 
-    if (e.keyCode === keyboard.z) moveState.front = false;
-    else if (e.keyCode === keyboard.s) moveState.Backwards = false;
-    else if (e.keyCode === keyboard.q) moveState.left = false;
-    else if (e.keyCode === keyboard.d) moveState.right = false;
+    if (e.keyCode === keyboard.z || e.keyCode === keyboard.up) moveState.front = false;
+    else if (e.keyCode === keyboard.s || e.keyCode === keyboard.down) moveState.Backwards = false;
+    else if (e.keyCode === keyboard.q || e.keyCode === keyboard.left) moveState.left = false;
+    else if (e.keyCode === keyboard.d || e.keyCode === keyboard.right) moveState.right = false;
 
     if (!moveState.front && !moveState.Backwards && !moveState.left && !moveState.right) {
         changeMotion(player.model.state);
@@ -295,8 +306,6 @@ window.addEventListener('DOMContentLoaded', function(){
     height = window.innerHeight;
 
     clock = new THREE.Clock();
-
-    window.console.log(clock);
 
     scene = new THREE.Scene();
 

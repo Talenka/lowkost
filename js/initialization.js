@@ -111,15 +111,16 @@ window.addEventListener('DOMContentLoaded', function() {
   camera = new THREE.PerspectiveCamera(40, width / height, 1, 1000);
   scene.add(camera);
 
-  loadSkyAndGround();
-  createCubes();
-  loadPlayerMesh();
-
   animate();
 
   // Start listening to user's controls
   document.addEventListener('keydown', keydownControls);
   document.addEventListener('keyup', keyupControls);
   document.addEventListener('mousemove', mousemoveControls);
+
+  // Loading stuff
+  loadSkyAndGround();
+  createCubes();
+  loadPlayerMesh();
 
 }, false);

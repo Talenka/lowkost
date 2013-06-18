@@ -996,7 +996,7 @@ public_functions.removeConstraint = function(details) {
  */
 public_functions.constraint_setBreakingImpulseThreshold = function(details) {
   var constraint = _constraints[details.id];
-  if (constraint !== undefind) {
+  if (constraint !== undefined) {
     constraint.setBreakingImpulseThreshold(details.threshold);
   }
 };

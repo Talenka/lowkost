@@ -79,24 +79,31 @@ var ab = new ArrayBuffer(1);
 transferableMessage(ab, [ab]);
 var SUPPORT_TRANSFERABLE = (ab.byteLength === 0);
 
-getShapeFromCache = function (cache_key) {
+getShapeFromCache = function(cache_key) {
   if (_object_shapes[cache_key] !== undefined) {
     return _object_shapes[cache_key];
   }
   return null;
 };
 
-setShapeCache = function (cache_key, shape) {
+setShapeCache = function(cache_key, shape) {
   _object_shapes[cache_key] = shape;
-}
+};
 
+
+/**
+ * @param {Object} description
+ * @return {Object} The created shape.
+ */
 createShape = function(description) {
   var cache_key, shape;
 
   _transform.setIdentity();
   switch (description.type) {
     case 'plane':
-      cache_key = 'plane_' + description.normal.x + '_' + description.normal.y + '_' + description.normal.z;
+      cache_key = 'plane_' + description.normal.x + '_' +
+                  description.normal.y + '_' + description.normal.z;
+
       if ((shape = getShapeFromCache(cache_key)) === null) {
         _vec3_1.setX(description.normal.x);
         _vec3_1.setY(description.normal.y);
@@ -107,7 +114,9 @@ createShape = function(description) {
       break;
 
     case 'box':
-      cache_key = 'box_' + description.width + '_' + description.height + '_' + description.depth;
+      cache_key = 'box_' + description.width + '_' +
+                  description.height + '_' + description.depth;
+
       if ((shape = getShapeFromCache(cache_key)) === null) {
         _vec3_1.setX(description.width / 2);
         _vec3_1.setY(description.height / 2);
@@ -126,7 +135,9 @@ createShape = function(description) {
       break;
 
     case 'cylinder':
-      cache_key = 'cylinder_' + description.width + '_' + description.height + '_' + description.depth;
+      cache_key = 'cylinder_' + description.width + '_' +
+                  description.height + '_' + description.depth;
+
       if ((shape = getShapeFromCache(cache_key)) === null) {
         _vec3_1.setX(description.width / 2);
         _vec3_1.setY(description.height / 2);
@@ -157,7 +168,7 @@ createShape = function(description) {
 
     case 'concave':
       var i, triangle, triangle_mesh = new Ammo.btTriangleMesh;
-      if (!description.triangles.length) return false
+      if (!description.triangles.length) return false;
 
       for (i = 0; i < description.triangles.length; i++) {
         triangle = description.triangles[i];
@@ -174,19 +185,10 @@ createShape = function(description) {
         _vec3_3.setY(triangle[2].y);
         _vec3_3.setZ(triangle[2].z);
 
-        triangle_mesh.addTriangle(
-          _vec3_1,
-          _vec3_2,
-          _vec3_3,
-          true
-       );
+        triangle_mesh.addTriangle(_vec3_1, _vec3_2, _vec3_3, true);
       }
 
-      shape = new Ammo.btBvhTriangleMeshShape(
-        triangle_mesh,
-        true,
-        true
-     );
+      shape = new Ammo.btBvhTriangleMeshShape(triangle_mesh, true, true);
       break;
 
     case 'convex':
@@ -209,23 +211,15 @@ createShape = function(description) {
                               'float', Ammo.ALLOC_NORMAL);
 
       for (var f = 0; f < description.points.length; f++) {
-        Ammo.setValue(ptr + f,  description.points[f]  , 'float');
+        Ammo.setValue(ptr + f, description.points[f], 'float');
       }
 
       shape = new Ammo.btHeightfieldTerrainShape(
-          description.xpts,
-          description.ypts,
-          ptr,
-          1,
-          -description.absMaxHeight,
-          description.absMaxHeight,
-          2,
-          0,
-          false
-       );
+          description.xpts, description.ypts, ptr, 1,
+          -description.absMaxHeight, description.absMaxHeight, 2, 0, false);
 
-      _vec3_1.setX(description.xsize/(description.xpts - 1));
-      _vec3_1.setY(description.ysize/(description.ypts - 1));
+      _vec3_1.setX(description.xsize / (description.xpts - 1));
+      _vec3_1.setY(description.ysize / (description.ypts - 1));
       _vec3_1.setZ(1);
 
       shape.setLocalScaling(_vec3_1);
@@ -240,14 +234,18 @@ createShape = function(description) {
   return shape;
 };
 
+
+/**
+ * @param {Object} params
+ */
 public_functions.init = function(params) {
   importScripts(params.ammo);
 
   _transform = new Ammo.btTransform;
-  _vec3_1 = new Ammo.btVector3(0,0,0);
-  _vec3_2 = new Ammo.btVector3(0,0,0);
-  _vec3_3 = new Ammo.btVector3(0,0,0);
-  _quat = new Ammo.btQuaternion(0,0,0,0);
+  _vec3_1 = new Ammo.btVector3(0, 0, 0);
+  _vec3_2 = new Ammo.btVector3(0, 0, 0);
+  _vec3_3 = new Ammo.btVector3(0, 0, 0);
+  _quat = new Ammo.btQuaternion(0, 0, 0, 0);
 
   REPORT_CHUNKSIZE = params.reportsize || 50;
 
@@ -281,9 +279,9 @@ public_functions.init = function(params) {
   constraintreport[0] = MESSAGE_TYPES.CONSTRAINTREPORT;
 
   var collisionConfiguration = new Ammo.btDefaultCollisionConfiguration,
-    dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration),
-    solver = new Ammo.btSequentialImpulseConstraintSolver,
-    broadphase;
+      dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration),
+      solver = new Ammo.btSequentialImpulseConstraintSolver,
+      broadphase;
 
   if (!params.broadphase) params.broadphase = { type: 'dynamic' };
   switch (params.broadphase.type) {
@@ -297,10 +295,7 @@ public_functions.init = function(params) {
       _vec3_2.setY(params.broadphase.aabbmax.y);
       _vec3_2.setZ(params.broadphase.aabbmax.z);
 
-      broadphase = new Ammo.btAxisSweep3(
-        _vec3_1,
-        _vec3_2
-     );
+      broadphase = new Ammo.btAxisSweep3(_vec3_1, _vec3_2);
 
       break;
 
@@ -319,14 +314,26 @@ public_functions.init = function(params) {
   transferableMessage({ cmd: 'worldReady' });
 };
 
+
+/**
+ * @param {Object} description
+ */
 public_functions.registerMaterial = function(description) {
   _materials[description.id] = description;
 };
 
+
+/**
+ * @param {Object} description
+ */
 public_functions.setFixedTimeStep = function(description) {
   fixedTimeStep = description;
 };
 
+
+/**
+ * @param {Object} description
+ */
 public_functions.setGravity = function(description) {
   _vec3_1.setX(description.x);
   _vec3_1.setY(description.y);
@@ -334,41 +341,51 @@ public_functions.setGravity = function(description) {
   world.setGravity(_vec3_1);
 };
 
+
+/**
+ * @param {Object} description
+ */
 public_functions.addObject = function(description) {
 
   var i,
-  localInertia, shape, motionState, rbInfo, body;
+      localInertia,
+      shape,
+      motionState,
+      rbInfo,
+      body;
 
-shape = createShape(description);
-if (!shape) return
-// If there are children then this is a compound shape
-if (description.children) {
-  var compound_shape = new Ammo.btCompoundShape, _child;
-  compound_shape.addChildShape(_transform, shape);
+  shape = createShape(description);
 
-  for (i = 0; i < description.children.length; i++) {
-    _child = description.children[i];
+  if (!shape) return;
 
-    var trans = new Ammo.btTransform;
-    trans.setIdentity();
+  // If there are children then this is a compound shape
+  if (description.children) {
+    var compound_shape = new Ammo.btCompoundShape, _child;
+    compound_shape.addChildShape(_transform, shape);
 
-    _vec3_1.setX(_child.position_offset.x);
-    _vec3_1.setY(_child.position_offset.y);
-    _vec3_1.setZ(_child.position_offset.z);
-    trans.setOrigin(_vec3_1);
+    for (i = 0; i < description.children.length; i++) {
+      _child = description.children[i];
 
-    _quat.setX(_child.rotation.x);
-    _quat.setY(_child.rotation.y);
-    _quat.setZ(_child.rotation.z);
-    _quat.setW(_child.rotation.w);
-    trans.setRotation(_quat);
+      var trans = new Ammo.btTransform;
+      trans.setIdentity();
 
-    shape = createShape(description.children[i]);
-    compound_shape.addChildShape(trans, shape);
-    Ammo.destroy(trans);
-  }
+      _vec3_1.setX(_child.position_offset.x);
+      _vec3_1.setY(_child.position_offset.y);
+      _vec3_1.setZ(_child.position_offset.z);
+      trans.setOrigin(_vec3_1);
 
-  shape = compound_shape;
+      _quat.setX(_child.rotation.x);
+      _quat.setY(_child.rotation.y);
+      _quat.setZ(_child.rotation.z);
+      _quat.setW(_child.rotation.w);
+      trans.setRotation(_quat);
+
+      shape = createShape(description.children[i]);
+      compound_shape.addChildShape(trans, shape);
+      Ammo.destroy(trans);
+    }
+
+    shape = compound_shape;
   }
   _vec3_1.setX(0);
   _vec3_1.setY(0);
@@ -391,7 +408,8 @@ if (description.children) {
   // #TODO: btDefaultMotionState supports center of
   // mass offset as second argument - implement
   motionState = new Ammo.btDefaultMotionState(_transform);
-  rbInfo = new Ammo.btRigidBodyConstructionInfo(description.mass, motionState, shape, _vec3_1);
+  rbInfo = new Ammo.btRigidBodyConstructionInfo(description.mass, motionState,
+                                                shape, _vec3_1);
 
   if (description.materialId !== undefined) {
     rbInfo.set_m_friction(_materials[description.materialId].friction);
@@ -416,19 +434,27 @@ if (description.children) {
   transferableMessage({ cmd: 'objectReady', params: body.id });
 };
 
+
+/**
+ * @param {Object} description
+ */
 public_functions.addVehicle = function(description) {
   var vehicle_tuning = new Ammo.btVehicleTuning(),
-    vehicle;
+      vehicle;
 
   vehicle_tuning.set_m_suspensionStiffness(description.suspension_stiffness);
-  vehicle_tuning.set_m_suspensionCompression(description.suspension_compression);
+
+  vehicle_tuning.set_m_suspensionCompression(
+      description.suspension_compression);
+
   vehicle_tuning.set_m_suspensionDamping(description.suspension_damping);
   vehicle_tuning.set_m_maxSuspensionTravelCm(description.max_suspension_travel);
   vehicle_tuning.set_m_maxSuspensionForce(description.max_suspension_force);
 
-  vehicle = new Ammo.btRaycastVehicle(vehicle_tuning,
-                                      _objects[description.rigidBody],
-                                      new Ammo.btDefaultVehicleRaycaster(world));
+  vehicle =
+      new Ammo.btRaycastVehicle(vehicle_tuning, _objects[description.rigidBody],
+                                new Ammo.btDefaultVehicleRaycaster(world));
+
   vehicle.tuning = vehicle_tuning;
 
   _objects[description.rigidBody].setActivationState(4);
@@ -437,19 +463,35 @@ public_functions.addVehicle = function(description) {
   world.addVehicle(vehicle);
   _vehicles[description.id] = vehicle;
 };
+
+
+/**
+ * @param {Object} description
+ */
 public_functions.removeVehicle = function(description) {
   delete _vehicles[description.id];
 };
 
+
+/**
+ * @param {Object} description
+ */
 public_functions.addWheel = function(description) {
   if (_vehicles[description.id] !== undefined) {
     var tuning = _vehicles[description.id].tuning;
+
     if (description.tuning !== undefined) {
       tuning = new Ammo.btVehicleTuning();
       tuning.set_m_suspensionStiffness(description.tuning.suspension_stiffness);
-      tuning.set_m_suspensionCompression(description.tuning.suspension_compression);
+
+      tuning.set_m_suspensionCompression(
+          description.tuning.suspension_compression);
+
       tuning.set_m_suspensionDamping(description.tuning.suspension_damping);
-      tuning.set_m_maxSuspensionTravelCm(description.tuning.max_suspension_travel);
+
+      tuning.set_m_maxSuspensionTravelCm(
+          description.tuning.max_suspension_travel);
+
       tuning.set_m_maxSuspensionForce(description.tuning.max_suspension_force);
     }
 
@@ -466,14 +508,10 @@ public_functions.addWheel = function(description) {
     _vec3_3.setZ(description.wheel_axle.z);
 
     _vehicles[description.id].addWheel(
-      _vec3_1,
-      _vec3_2,
-      _vec3_3,
-      description.suspension_rest_length,
-      description.wheel_radius,
-      tuning,
-      description.is_front_wheel
-   );
+        _vec3_1, _vec3_2, _vec3_3,
+        description.suspension_rest_length,
+        description.wheel_radius,
+        tuning, description.is_front_wheel);
   }
 
   _num_wheels++;
@@ -487,28 +525,50 @@ public_functions.addWheel = function(description) {
   }
 };
 
+
+/**
+ * @param {Object} details
+ */
 public_functions.setSteering = function(details) {
   if (_vehicles[details.id] !== undefined) {
     _vehicles[details.id].setSteeringValue(details.steering, details.wheel);
   }
 };
+
+
+/**
+ * @param {Object} details
+ */
 public_functions.setBrake = function(details) {
   if (_vehicles[details.id] !== undefined) {
     _vehicles[details.id].setBrake(details.brake, details.wheel);
   }
 };
+
+
+/**
+ * @param {Object} details
+ */
 public_functions.applyEngineForce = function(details) {
   if (_vehicles[details.id] !== undefined) {
     _vehicles[details.id].applyEngineForce(details.force, details.wheel);
   }
 };
 
+
+/**
+ * @param {Object} details
+ */
 public_functions.removeObject = function(details) {
   world.removeRigidBody(_objects[details.id]);
   delete _objects[details.id];
   _num_objects--;
 };
 
+
+/**
+ * @param {Object} details
+ */
 public_functions.updateTransform = function(details) {
   _object = _objects[details.id];
   _object.getMotionState().getWorldTransform(_transform);
@@ -532,6 +592,10 @@ public_functions.updateTransform = function(details) {
   _object.activate();
 };
 
+
+/**
+ * @param {Object} details
+ */
 public_functions.updateMass = function(details) {
   // #TODO: changing a static object into dynamic is buggy
   _object = _objects[details.id];
@@ -549,7 +613,11 @@ public_functions.updateMass = function(details) {
   _object.activate();
 };
 
-public_functions.applyCentralImpulse = function (details) {
+
+/**
+ * @param {Object} details
+ */
+public_functions.applyCentralImpulse = function(details) {
 
   _vec3_1.setX(details.x);
   _vec3_1.setY(details.y);
@@ -559,7 +627,11 @@ public_functions.applyCentralImpulse = function (details) {
   _objects[details.id].activate();
 };
 
-public_functions.applyImpulse = function (details) {
+
+/**
+ * @param {Object} details
+ */
+public_functions.applyImpulse = function(details) {
 
   _vec3_1.setX(details.impulse_x);
   _vec3_1.setY(details.impulse_y);
@@ -569,14 +641,15 @@ public_functions.applyImpulse = function (details) {
   _vec3_2.setY(details.y);
   _vec3_2.setZ(details.z);
 
-  _objects[details.id].applyImpulse(
-    _vec3_1,
-    _vec3_2
- );
+  _objects[details.id].applyImpulse(_vec3_1, _vec3_2);
   _objects[details.id].activate();
 };
 
-public_functions.applyCentralForce = function (details) {
+
+/**
+ * @param {Object} details
+ */
+public_functions.applyCentralForce = function(details) {
 
   _vec3_1.setX(details.x);
   _vec3_1.setY(details.y);
@@ -586,7 +659,11 @@ public_functions.applyCentralForce = function (details) {
   _objects[details.id].activate();
 };
 
-public_functions.applyForce = function (details) {
+
+/**
+ * @param {Object} details
+ */
+public_functions.applyForce = function(details) {
 
   _vec3_1.setX(details.impulse_x);
   _vec3_1.setY(details.impulse_y);
@@ -596,68 +673,85 @@ public_functions.applyForce = function (details) {
   _vec3_2.setY(details.y);
   _vec3_2.setZ(details.z);
 
-  _objects[details.id].applyForce(
-    _vec3_1,
-    _vec3_2
- );
+  _objects[details.id].applyForce(_vec3_1, _vec3_2);
   _objects[details.id].activate();
 };
 
-public_functions.setAngularVelocity = function (details) {
+
+/**
+ * @param {Object} details
+ */
+public_functions.setAngularVelocity = function(details) {
 
   _vec3_1.setX(details.x);
   _vec3_1.setY(details.y);
   _vec3_1.setZ(details.z);
 
-  _objects[details.id].setAngularVelocity(
-    _vec3_1
- );
+  _objects[details.id].setAngularVelocity(_vec3_1);
   _objects[details.id].activate();
 };
 
-public_functions.setLinearVelocity = function (details) {
+
+/**
+ * @param {Object} details
+ */
+public_functions.setLinearVelocity = function(details) {
 
   _vec3_1.setX(details.x);
   _vec3_1.setY(details.y);
   _vec3_1.setZ(details.z);
 
-  _objects[details.id].setLinearVelocity(
-    _vec3_1
- );
+  _objects[details.id].setLinearVelocity(_vec3_1);
   _objects[details.id].activate();
 };
 
-public_functions.setAngularFactor = function (details) {
+
+/**
+ * @param {Object} details
+ */
+public_functions.setAngularFactor = function(details) {
 
   _vec3_1.setX(details.x);
   _vec3_1.setY(details.y);
   _vec3_1.setZ(details.z);
 
-  _objects[details.id].setAngularFactor(
-      _vec3_1
- );
+  _objects[details.id].setAngularFactor(_vec3_1);
 };
 
-public_functions.setLinearFactor = function (details) {
+
+/**
+ * @param {Object} details
+ */
+public_functions.setLinearFactor = function(details) {
 
   _vec3_1.setX(details.x);
   _vec3_1.setY(details.y);
   _vec3_1.setZ(details.z);
 
-  _objects[details.id].setLinearFactor(
-    _vec3_1
- );
+  _objects[details.id].setLinearFactor(_vec3_1);
 };
 
-public_functions.setDamping = function (details) {
+
+/**
+ * @param {Object} details
+ */
+public_functions.setDamping = function(details) {
   _objects[details.id].setDamping(details.linear, details.angular);
 };
 
-public_functions.setCcdMotionThreshold = function (details) {
+
+/**
+ * @param {Object} details
+ */
+public_functions.setCcdMotionThreshold = function(details) {
   _objects[details.id].setCcdMotionThreshold(details.threshold);
 };
 
-public_functions.setCcdSweptSphereRadius = function (details) {
+
+/**
+ * @param {Object} details
+ */
+public_functions.setCcdSweptSphereRadius = function(details) {
   _objects[details.id].setCcdSweptSphereRadius(details.radius);
 };
 
@@ -665,7 +759,7 @@ public_functions.setCcdSweptSphereRadius = function (details) {
 /**
  * @param {Object} details
  */
-public_functions.addConstraint = function (details) {
+public_functions.addConstraint = function(details) {
   var constraint;
 
   switch (details.type) {
@@ -678,9 +772,7 @@ public_functions.addConstraint = function (details) {
         _vec3_1.setZ(details.positiona.z);
 
         constraint = new Ammo.btPoint2PointConstraint(
-          _objects[details.objecta],
-          _vec3_1
-       );
+            _objects[details.objecta], _vec3_1);
       } else {
 
         _vec3_1.setX(details.positiona.x);
@@ -692,11 +784,8 @@ public_functions.addConstraint = function (details) {
         _vec3_2.setZ(details.positionb.z);
 
         constraint = new Ammo.btPoint2PointConstraint(
-          _objects[details.objecta],
-          _objects[details.objectb],
-          _vec3_1,
-          _vec3_2
-       );
+            _objects[details.objecta], _objects[details.objectb],
+            _vec3_1, _vec3_2);
       }
       break;
 
@@ -712,10 +801,8 @@ public_functions.addConstraint = function (details) {
         _vec3_2.setZ(details.axis.z);
 
         constraint = new Ammo.btHingeConstraint(
-          _objects[details.objecta],
-          _vec3_1,
-          _vec3_2
-       );
+            _objects[details.objecta], _vec3_1, _vec3_2);
+
       } else {
 
         _vec3_1.setX(details.positiona.x);
@@ -731,13 +818,8 @@ public_functions.addConstraint = function (details) {
         _vec3_3.setZ(details.axis.z);
 
         constraint = new Ammo.btHingeConstraint(
-          _objects[details.objecta],
-          _objects[details.objectb],
-          _vec3_1,
-          _vec3_2,
-          _vec3_3,
-          _vec3_3
-       );
+            _objects[details.objecta], _objects[details.objectb],
+            _vec3_1, _vec3_2, _vec3_3, _vec3_3);
       }
       break;
 
@@ -770,18 +852,12 @@ public_functions.addConstraint = function (details) {
         transformb.setRotation(rotation);
 
         constraint = new Ammo.btSliderConstraint(
-          _objects[details.objecta],
-          _objects[details.objectb],
-          transforma,
-          transformb,
-          true
-       );
+            _objects[details.objecta], _objects[details.objectb],
+            transforma, transformb, true);
+
       } else {
         constraint = new Ammo.btSliderConstraint(
-          _objects[details.objecta],
-          transforma,
-          true
-       );
+            _objects[details.objecta], transforma, true);
       }
 
       Ammo.destroy(transforma);
@@ -822,11 +898,8 @@ public_functions.addConstraint = function (details) {
       transformb.setRotation(rotation);
 
       constraint = new Ammo.btConeTwistConstraint(
-        _objects[details.objecta],
-        _objects[details.objectb],
-        transforma,
-        transformb
-     );
+          _objects[details.objecta], _objects[details.objectb],
+          transforma, transformb);
 
       constraint.setLimit(Math.PI, 0, Math.PI);
 
@@ -870,14 +943,11 @@ public_functions.addConstraint = function (details) {
         transformb.setRotation(rotation);
 
         constraint = new Ammo.btGeneric6DofConstraint(
-          _objects[details.objecta],
-          _objects[details.objectb],
-          transforma,
-          transformb
-       );
+            _objects[details.objecta], _objects[details.objectb],
+            transforma, transformb);
       }
       else constraint = new Ammo.btGeneric6DofConstraint(
-               _objects[details.objecta], transforma);
+                                       _objects[details.objecta], transforma);
 
       Ammo.destroy(transforma);
 
@@ -931,6 +1001,10 @@ public_functions.constraint_setBreakingImpulseThreshold = function(details) {
   }
 };
 
+
+/**
+ * @param {Object} params
+ */
 public_functions.simulate = function simulate(params) {
   if (world) {
     params = params || {};
@@ -1495,6 +1569,10 @@ reportConstraints = function() {
 
 };
 
+
+/**
+ * @param {Event} event
+ */
 self.onmessage = function(event) {
 
   if (event.data instanceof Float32Array) {

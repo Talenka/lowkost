@@ -122,5 +122,7 @@ window.addEventListener('DOMContentLoaded', function() {
   loadSkyAndGround();
   createCubes();
   loadPlayerMesh();
+  createRoads();
+  createRiverSpring()
 
 }, false);

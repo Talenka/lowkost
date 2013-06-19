@@ -202,24 +202,8 @@ function loadSkyAndGround() {
   scene.add(ambientLight);
 
   // Create the ground (grass field)
-  var planeGeometry = new THREE.PlaneGeometry(1000, 1000);
-
-  var planeMaterial = Physijs.createMaterial(
-      new THREE.MeshLambertMaterial({
-        map: THREE.ImageUtils.loadTexture('images/grass.png'),
-        color: 0xffffff}),
-      .8, // high friction
-      .3 // low restitution
-      );
-
-  planeMaterial.map.repeat.set(300, 300);
-  planeMaterial.map.wrapS = planeMaterial.map.wrapT = THREE.RepeatWrapping;
-
-  var plane = new Physijs.BoxMesh(planeGeometry, planeMaterial, 0);
-
-  plane.castShadow = false;
-  plane.receiveShadow = true;
-  scene.add(plane);
+  createSimpleObject(
+      {shape: 'plane', size: [1000, 1000], m: 0, texture: 'images/grass.png'});
 
   // Create sunlight
   var sunlight = new THREE.DirectionalLight(0xfffffa, 1.5);
@@ -276,7 +260,7 @@ function loadPlayerMesh() {
 function createCubes() {
   var meshArray = [];
 
-  for (var i = 0; i < 50; i++) {
+  for (var i = 0; i < 5; i++) {
 
     meshArray[i] = new Physijs.BoxMesh(new THREE.CubeGeometry(1 + Math.random(),
                                                               Math.random(), 1),
@@ -295,4 +279,98 @@ function createCubes() {
     meshArray[i].receiveShadow = true;
     scene.add(meshArray[i]);
   }
+}
+
+function isArray(a) {
+  return (a instanceof Array);
+}
+
+function createSimpleObjects(objs) {
+  for (var i = 0, j = objs.length; i < j; i++) createSimpleObject(objs[i]);
+}
+
+function createSimpleObject(params) {
+
+  var pos = isArray(params.pos) ? params.pos : [0, 0, 0];
+  var rot = isArray(params.rot) ? params.rot : [0, 0, 0];
+
+  if (!params.color) params.color = 0xffffff;
+
+  var materParams = {color: params.color};
+
+  if (!params.shape) params.shape = 'cube';
+
+  if (params.shape == 'cube') {
+    var size = isArray(params.size) ? params.size : [1, 1, 1];
+    var shape = new THREE.CubeGeometry(size[0], size[1], size[2]);
+  }
+  else if (params.shape == 'cylinder') {
+    var size = isArray(params.size) ? params.size : [0.5, 0.5, 1];
+    var shape = new THREE.CylinderGeometry(
+        size[0], // Bottom radius
+        size[1], // Up radius
+        size[2], // Height
+        Math.ceil(Math.max(size[0], size[1]) * 8), // Radial fragments number
+        Math.ceil(size[2] * 2), // Axial fragments number
+        false // False means that the cylendre ends are closed.
+        );
+  }
+  else if (params.shape == 'plane') {
+    var size = isArray(params.size) ? params.size : [1, 1];
+    var shape = new THREE.PlaneGeometry(size[0], size[1]);
+
+    if (params.texture) {
+      materParams.map = THREE.ImageUtils.loadTexture(params.texture);
+      materParams.map.repeat.set(size[0], size[1]);
+      materParams.map.wrapS = materParams.map.wrapT = THREE.RepeatWrapping;
+    }
+  }
+
+  var mater = Physijs.createMaterial(
+      new THREE.MeshLambertMaterial(materParams),
+      params.friction, params.spring);
+
+  var simpleObject = new Physijs.BoxMesh(shape, mater, params.m);
+  simpleObject.castShadow = true;
+  simpleObject.receiveShadow = true;
+  simpleObject.position.set(pos[0], pos[1], pos[2]);
+  simpleObject.rotation.set(rot[0], rot[1], rot[2]);
+  scene.add(simpleObject);
+}
+
+function createRiverSpring() {
+
+
+  var spring = new Physijs.BoxMesh(
+      new THREE.CylinderGeometry(5, 5, 0.2, 32, 2, true),
+      new THREE.MeshLambertMaterial({color: 0xaa0000}));
+
+  spring.position.x = 10;
+  spring.position.y = .1;
+  spring.position.z = -10;
+
+  scene.add(spring);
+}
+
+function createRoads() {
+
+  createRoad({x: 0, z: 500}, {x: 0, z: -500});
+  createRoad({x: 0, z: -20}, {x: 100, z: -120});
+  createRoad({x: 0, z: -20}, {x: -100, z: -120});
+  createRoad({x: 0, z: 20}, {x: 100, z: 120});
+  createRoad({x: 0, z: 20}, {x: -100, z: 120});
+  createRoad({x: 500, z: 0}, {x: -500, z: 0});
+  createRoad({x: -20, z: 0}, {x: -120, z: -100});
+  createRoad({x: -20, z: 0}, {x: -120, z: 100});
+  createRoad({x: 20, z: 0}, {x: 120, z: 100});
+  createRoad({x: 20, z: 0}, {x: 120, z: -100});
+}
+
+function createRoad(a, b) {
+  createSimpleObject({shape: 'plane',
+      size: [Math.sqrt((b.x - a.x) * (b.x - a.x) +
+                       (b.z - a.z) * (b.z - a.z)), 2],
+      pos: [(b.x + a.x) / 2, .02, (b.z + a.z) / 2],
+      rot: [0, - Math.atan((b.z - a.z) / (b.x - a.x)), 0],
+      m: 0, texture: 'images/pave.jpg'});
 }

@@ -1,5 +1,6 @@
 'use strict';
 
+
 /**
  * List of keyboard codes.
  * @type {Object.<string, number>}

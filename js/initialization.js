@@ -118,6 +118,9 @@ window.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('keyup', keyupControls);
   document.addEventListener('mousemove', mousemoveControls);
 
+  // Say hello, world !
+  document.title = 'Talenka Low Kost';
+
   loadStuff();
 
 }, false);

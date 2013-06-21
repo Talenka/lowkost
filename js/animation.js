@@ -16,7 +16,7 @@ var player = {
 
 
 /**
- * Player droid-like (code MD2) mesh 
+ * Player droid-like (code MD2) mesh
  * @type {Object}
  */
 var md2meshBody;
@@ -305,9 +305,10 @@ function createCubes() {
 
 
 /**
- * Shorthand to check whether an object is an Array or not
+ * Check whether an object is an Array or not
  * @param {?} a The object to check.
- */ 
+ * @return {boolean}
+ */
 function isArray(a) {
   return (a instanceof Array);
 }
@@ -376,7 +377,7 @@ function createSimpleObject(params) {
 
 /**
  * Create the river (log) of this world
- * @TODO
+ * TODO
  */
 function createRiverSpring() {
 
@@ -449,16 +450,16 @@ function createRoads() {
  */
 function createRoad(a, b) {
   createSimpleObject({shape: 'plane',
-      // Road length is the sqare root of (x2 - x1)^2 + (z2 - z1)^2
-      size: [Math.sqrt((b.x - a.x) * (b.x - a.x) +
-                       (b.z - a.z) * (b.z - a.z)), 2],
-      // X and Z coordinates of the road are simply the middle between start
-      // and end points. The Y coordinate is randomly chosen between 1 and 2
-      // millimeters, to prevent display glitch.
-      pos: [(b.x + a.x) / 2, (1 + Math.random()) / 1000, (b.z + a.z) / 2],
-      rot: [0, - Math.atan((b.z - a.z) / (b.x - a.x)), 0],
-      m: 0, // The road have no mass
-      texture: 'images/pave.jpg'});
+    // Road length is the sqare root of (x2 - x1)^2 + (z2 - z1)^2
+    size: [Math.sqrt((b.x - a.x) * (b.x - a.x) +
+                     (b.z - a.z) * (b.z - a.z)), 2],
+    // X and Z coordinates of the road are simply the middle between start
+    // and end points. The Y coordinate is randomly chosen between 1 and 2
+    // millimeters, to prevent display glitch.
+    pos: [(b.x + a.x) / 2, (1 + Math.random()) / 1000, (b.z + a.z) / 2],
+    rot: [0, - Math.atan((b.z - a.z) / (b.x - a.x)), 0],
+    m: 0, // The road have no mass
+    texture: 'images/pave.jpg'});
 }
 
 

@@ -118,11 +118,6 @@ window.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('keyup', keyupControls);
   document.addEventListener('mousemove', mousemoveControls);
 
-  // Loading stuff
-  loadSkyAndGround();
-  createCubes();
-  loadPlayerMesh();
-  createRoads();
-  createRiverSpring()
+  loadStuff();
 
 }, false);

@@ -15,10 +15,15 @@ var player = {
 };
 
 
+/**
+ * Player droid-like (code MD2) mesh 
+ * @type {Object}
+ */
 var md2meshBody;
 
 
 /**
+ * Player motion state
  * @type {Object}
  */
 var moveState = {
@@ -113,6 +118,10 @@ function move() {
   player.position.z -= Math.cos(direction * deg2rad) * speed;
 }
 
+
+/**
+ * @param {string} motion The new player motion.
+ */
 function changeMotion(motion) {
   player.model.motion = motion;
   player.model.state = md2frames[motion][3].state;
@@ -126,10 +135,14 @@ function changeMotion(motion) {
   md2meshBody.setFrameRange(animMin, animMax);
 }
 
+
+/**
+ * Animate the world by updating position and speed for all objects created.
+ */
 function animate() {
   requestAnimationFrame(animate);
 
-  player.model.objects.position = {x: player.position.x,
+  player.model.objects.position = { x: player.position.x,
                                     y: player.position.y,
                                     z: player.position.z};
 
@@ -195,6 +208,9 @@ function playerCollision(collided, velocity, momentum) {
 }
 
 
+/**
+ * As god the First Day, create the sky and the earth
+ */
 function loadSkyAndGround() {
   // Create the blue sky
   scene.fog = new THREE.FogExp2(0x9999ff, 0.01);
@@ -213,6 +229,9 @@ function loadSkyAndGround() {
 }
 
 
+/**
+ * Create a animated droid-like player model
+ */
 function loadPlayerMesh() {
 
   droidMaterial = new THREE.MeshLambertMaterial({
@@ -257,6 +276,9 @@ function loadPlayerMesh() {
 }
 
 
+/**
+ * Create some cubes to test world basic physics
+ */
 function createCubes() {
   var meshArray = [];
 
@@ -281,14 +303,27 @@ function createCubes() {
   }
 }
 
+
+/**
+ * Shorthand to check whether an object is an Array or not
+ * @param {?} a The object to check.
+ */ 
 function isArray(a) {
   return (a instanceof Array);
 }
 
+
+/**
+ * @param {Array.<Object>} objs List of objects to be created.
+ */
 function createSimpleObjects(objs) {
   for (var i = 0, j = objs.length; i < j; i++) createSimpleObject(objs[i]);
 }
 
+
+/**
+ * @param {Object} params Object's parameters.
+ */
 function createSimpleObject(params) {
 
   var pos = isArray(params.pos) ? params.pos : [0, 0, 0];
@@ -338,6 +373,11 @@ function createSimpleObject(params) {
   scene.add(simpleObject);
 }
 
+
+/**
+ * Create the river (log) of this world
+ * @TODO
+ */
 function createRiverSpring() {
 
 
@@ -352,6 +392,41 @@ function createRiverSpring() {
   scene.add(spring);
 }
 
+
+/**
+ * Test to load a un-animated model
+ */
+function createTree() {
+
+  var treeBody;
+  var treeMaterial = new THREE.MeshLambertMaterial({
+    ambient: 0x999999,
+    color: 0x00ff00,
+    specular: 0xffffff,
+    shininess: 25,
+    morphTargets: true});
+
+  loader = new THREE.JSONLoader();
+
+  loader.load('js/tree.js', function(geometry) {
+    treeBody = new THREE.MorphAnimMesh(geometry, treeMaterial);
+    treeBody.rotation.y = -Math.PI / 2;
+    treeBody.scale.set(.02, .02, .02);
+    treeBody.position.x = 4;
+    treeBody.position.y = 4;
+    treeBody.position.z = 2;
+    treeBody.castShadow = true;
+    treeBody.receiveShadow = true;
+  });
+
+
+  scene.add(treeBody);
+}
+
+
+/**
+ * Create the basic road system on the map
+ */
 function createRoads() {
 
   createRoad({x: 0, z: 500}, {x: 0, z: -500});
@@ -366,11 +441,35 @@ function createRoads() {
   createRoad({x: 20, z: 0}, {x: 120, z: -100});
 }
 
+
+/**
+ * Create a road on the floor between two points.
+ * @param {{x: number, z:number}} a Road start XZ-coordinates.
+ * @param {{x: number, z:number}} b Road end XZ-coordinates.
+ */
 function createRoad(a, b) {
   createSimpleObject({shape: 'plane',
+      // Road length is the sqare root of (x2 - x1)^2 + (z2 - z1)^2
       size: [Math.sqrt((b.x - a.x) * (b.x - a.x) +
                        (b.z - a.z) * (b.z - a.z)), 2],
-      pos: [(b.x + a.x) / 2, .02, (b.z + a.z) / 2],
+      // X and Z coordinates of the road are simply the middle between start
+      // and end points. The Y coordinate is randomly chosen between 1 and 2
+      // millimeters, to prevent display glitch.
+      pos: [(b.x + a.x) / 2, (1 + Math.random()) / 1000, (b.z + a.z) / 2],
       rot: [0, - Math.atan((b.z - a.z) / (b.x - a.x)), 0],
-      m: 0, texture: 'images/pave.jpg'});
+      m: 0, // The road have no mass
+      texture: 'images/pave.jpg'});
+}
+
+
+/**
+ * Load objects contained in the world
+ */
+function loadStuff() {
+  loadSkyAndGround();
+  createCubes();
+  loadPlayerMesh();
+  createRoads();
+  createRiverSpring();
+  createTree();
 }

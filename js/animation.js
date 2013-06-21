@@ -209,7 +209,7 @@ function animate() {
  * @param {THREE.Vector3} momentum The relative angular momentum.
  */
 function playerCollision(collided, velocity, momentum) {
-  console.log(velocity);
+  window.console.log(velocity);
   // @TODO
   // player.physicalShape
 }

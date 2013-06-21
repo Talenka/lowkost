@@ -1,6 +1,6 @@
 # Talenka Low Kost
 
-By [Boudah](http://boudah.pl) and Pouet 
+By [Boudah](http://boudah.pl) and [Pouet](https://github.com/Pouet--) 
 from [Talenka Association](http://talenka.org).
 
 Published under [GNU General Public License](https://gnu.org/licenses/gpl). 

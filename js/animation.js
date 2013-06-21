@@ -236,31 +236,25 @@ function loadSkyAndGround() {
 }
 
 
-/**
- * Create a animated droid-like player model
- */
-function loadPlayerMesh() {
+function createPlayer(geometry) {
 
+  // Material
   droidMaterial = new THREE.MeshLambertMaterial({
-    map: THREE.ImageUtils.loadTexture('images/1.png'),
+    map: THREE.ImageUtils.loadTexture('images/droid.png'),
     ambient: 0x999999,
     color: 0xffffff,
     specular: 0xffffff,
     shininess: 25,
     morphTargets: true});
 
-  loader = new THREE.JSONLoader();
-
-  loader.load('js/droid.js', function(geometry) {
-    md2meshBody = new THREE.MorphAnimMesh(geometry, droidMaterial);
-    md2meshBody.rotation.y = -Math.PI / 2;
-    md2meshBody.scale.set(.02, .02, .02);
-    md2meshBody.position.y = .5;
-    md2meshBody.castShadow = true;
-    md2meshBody.receiveShadow = true;
-    changeMotion('stand');
-    player.model.objects.add(md2meshBody);
-  });
+  md2meshBody = new THREE.MorphAnimMesh(geometry, droidMaterial);
+  md2meshBody.rotation.y = -Math.PI / 2;
+  md2meshBody.scale.set(.02, .02, .02);
+  md2meshBody.position.y = .5;
+  md2meshBody.castShadow = true;
+  md2meshBody.receiveShadow = true;
+  changeMotion('stand');
+  player.model.objects.add(md2meshBody);
 
   // Now that we have the droid model, we have to bind it to a physical shape
   // in order to manage collision and jumps, for example.
@@ -308,6 +302,74 @@ function createCubes() {
     meshArray[i].receiveShadow = true;
     scene.add(meshArray[i]);
   }
+}
+
+
+/**
+ * @param {THREE.Geometry} geometry
+ * @param {THREE.Material} materials
+ */
+function createHouse(geometry, materials) {
+
+  var houseMesh = new THREE.Mesh(geometry,
+                                 new THREE.MeshFaceMaterial(materials));
+
+  houseMesh.position.set(-15, 0, 10);
+  houseMesh.scale.set(0.01, 0.01, 0.01);
+  scene.add(houseMesh);
+
+}
+
+
+/**
+ * @param {THREE.Geometry} geometry
+ * @param {THREE.Material} materials
+ */
+function createBuilding(geometry, materials) {
+
+  var buildingMesh = new THREE.Mesh(geometry,
+                                    new THREE.MeshFaceMaterial(materials));
+
+  buildingMesh.position.set(-20, 0, -5);
+  buildingMesh.scale.set(0.01, 0.01, 0.01);
+  scene.add(buildingMesh);
+
+}
+
+
+/**
+ * @param {THREE.Geometry} geometry
+ */
+function createTrees(geometry) {
+
+  var meshTrees = [];
+  for (var i = 0; i < 5; i++) {
+    meshTrees[i] = new THREE.Mesh(geometry, new THREE.MeshFaceMaterial());
+    meshTrees[i].position.set(2.5, 0, 3 * i + 3);
+    meshTrees[i].scale.set(0.02, 0.02, 0.02);
+    scene.add(meshTrees[i]);
+  }
+}
+
+
+/**
+ * @param {THREE.Geometry} geometry
+ */
+function createMonster(geometry) {
+
+  var monsterMaterial = new THREE.MeshLambertMaterial({
+    map: THREE.ImageUtils.loadTexture('images/monster.jpg'),
+    ambient: 0x999999,
+    color: 0xffffff,
+    specular: 0xffffff,
+    shininess: 25,
+    morphTargets: true});
+
+  var monsterMesh = new THREE.MorphAnimMesh(geometry, monsterMaterial);
+  monsterMesh.position.set(-5, 0, 0);
+  monsterMesh.scale.set(0.001, 0.001, 0.001);
+  scene.add(monsterMesh);
+
 }
 
 
@@ -475,8 +537,21 @@ function createRoad(a, b) {
 function loadStuff() {
   loadSkyAndGround();
   createCubes();
-  loadPlayerMesh();
   createRoads();
   createRiverSpring();
-  createTree();
+
+  var loader = new THREE.JSONLoader();
+
+  // Houses
+  loader.load('js/house.js', createHouse, 'images/house');
+  loader.load('js/building.js', createBuilding, 'images/building');
+
+  // Trees
+  loader.load('js/tree.js', createTrees);
+
+  // Player
+  loader.load('js/droid.js', createPlayer);
+
+  // Monster
+  loader.load('js/monster.js', createMonster);
 }

@@ -2,6 +2,13 @@
 
 
 /**
+ * @type {number}
+ * @const
+ */
+var WHITE = 0xffffff;
+
+
+/**
  * The player
  * @type {Object}
  */
@@ -17,14 +24,14 @@ var player = {
 
 /**
  * Player droid-like (code MD2) mesh
- * @type {Object}
+ * @type {THREE.Mesh}
  */
 var md2meshBody;
 
 
 /**
  * Tree mesh
- * @type {Object}
+ * @type {THREE.Mesh}
  */
 var treeBody;
 
@@ -87,6 +94,9 @@ var md2frames = {
 var direction = 0;
 
 
+/**
+ * Update the player's position in function of its motion.
+ */
 function move() {
 
   if (player.model.motion !== 'run' && player.model.state === 'stand')
@@ -154,7 +164,7 @@ function animate() {
                                     z: player.position.z};
 
   // Update the physical shape's position
-  // @TODO
+  // TODO
   if (player.physicalShape) {
     player.physicalShape.position.x = player.position.x;
     player.physicalShape.position.y = player.position.y +
@@ -209,14 +219,17 @@ function animate() {
  * @param {THREE.Vector3} momentum The relative angular momentum.
  */
 function playerCollision(collided, velocity, momentum) {
+
+  window.console.log(collided);
   window.console.log(velocity);
+  window.alert('Aie !');
   // @TODO
   // player.physicalShape
 }
 
 
 /**
- * As god the First Day, create the sky and the earth
+ * As god the First Day, create the sky and the earth.
  */
 function loadSkyAndGround() {
   // Create the blue sky
@@ -236,14 +249,17 @@ function loadSkyAndGround() {
 }
 
 
+/**
+ * @param {THREE.Geometry} geometry
+ */
 function createPlayer(geometry) {
 
   // Material
   droidMaterial = new THREE.MeshLambertMaterial({
     map: THREE.ImageUtils.loadTexture('images/droid.png'),
     ambient: 0x999999,
-    color: 0xffffff,
-    specular: 0xffffff,
+    color: WHITE,
+    specular: WHITE,
     shininess: 25,
     morphTargets: true});
 
@@ -265,7 +281,7 @@ function createPlayer(geometry) {
                                  player.modelHeight,
                                  16, 4, false),
       new THREE.MeshLambertMaterial({opacity: 0.3, transparent: true}),
-      1); // Mass
+      5); // Mass
 
   player.physicalShape.position.y = player.modelHeight / 2;
 
@@ -285,29 +301,36 @@ function createCubes() {
 
   for (var i = 0; i < 5; i++) {
 
-    meshArray[i] = new Physijs.BoxMesh(new THREE.CubeGeometry(1 + Math.random(),
-                                                              Math.random(), 1),
-                                       new THREE.MeshLambertMaterial({
-                                         color: 0xffffff * Math.random()}));
+    createSimpleObject({
+      shape: 'cube',
+      color: WHITE * Math.random(),
+      size: [0.5 + Math.random(), 0.5 + Math.random(), 0.5 + Math.random()],
+      pos: [i % 2 * 5 - 2.5, 10 * Math.random(), -0.8 * i],
+      rot: [Math.random(), Math.random(), Math.random()]});
 
-    meshArray[i].position.x = i % 2 * 5 - 2.5;
-    meshArray[i].position.y = 10 * Math.random();
-    meshArray[i].position.z = -0.8 * i;
+    // meshArray[i] = new Physijs.BoxMesh(new THREE.CubeGeometry(1 + Math.random(),
+    //                                                           Math.random(), 1),
+    //                                    new THREE.MeshLambertMaterial({
+    //                                      color: WHITE * Math.random()}));
 
-    meshArray[i].rotation.x = Math.random();
-    meshArray[i].rotation.y = Math.random();
-    meshArray[i].rotation.z = Math.random();
+    // meshArray[i].position.x = i % 2 * 5 - 2.5;
+    // meshArray[i].position.y = 10 * Math.random();
+    // meshArray[i].position.z = -0.8 * i;
 
-    meshArray[i].castShadow = true;
-    meshArray[i].receiveShadow = true;
-    scene.add(meshArray[i]);
+    // meshArray[i].rotation.x = Math.random();
+    // meshArray[i].rotation.y = Math.random();
+    // meshArray[i].rotation.z = Math.random();
+
+    // meshArray[i].castShadow = true;
+    // meshArray[i].receiveShadow = true;
+    // scene.add(meshArray[i]);
   }
 }
 
 
 /**
  * @param {THREE.Geometry} geometry
- * @param {THREE.Material} materials
+ * @param {Array} materials
  */
 function createHouse(geometry, materials) {
 
@@ -323,7 +346,7 @@ function createHouse(geometry, materials) {
 
 /**
  * @param {THREE.Geometry} geometry
- * @param {THREE.Material} materials
+ * @param {Array} materials
  */
 function createBuilding(geometry, materials) {
 
@@ -360,8 +383,8 @@ function createMonster(geometry) {
   var monsterMaterial = new THREE.MeshLambertMaterial({
     map: THREE.ImageUtils.loadTexture('images/monster.jpg'),
     ambient: 0x999999,
-    color: 0xffffff,
-    specular: 0xffffff,
+    color: WHITE,
+    specular: WHITE,
     shininess: 25,
     morphTargets: true});
 
@@ -369,7 +392,6 @@ function createMonster(geometry) {
   monsterMesh.position.set(-5, 0, 0);
   monsterMesh.scale.set(0.001, 0.001, 0.001);
   scene.add(monsterMesh);
-
 }
 
 
@@ -399,7 +421,7 @@ function createSimpleObject(params) {
   var pos = isArray(params.pos) ? params.pos : [0, 0, 0];
   var rot = isArray(params.rot) ? params.rot : [0, 0, 0];
 
-  if (!params.color) params.color = 0xffffff;
+  if (!params.color) params.color = WHITE;
 
   var materParams = {color: params.color};
 
@@ -471,7 +493,7 @@ function createTree() {
   var treeMaterial = new THREE.MeshLambertMaterial({
     ambient: 0x999999,
     color: 0x00ff00,
-    specular: 0xffffff,
+    specular: WHITE,
     shininess: 25,
     morphTargets: true});
 
@@ -479,8 +501,6 @@ function createTree() {
 
   loader.load('js/tree.js', function(geometry) {
     treeBody = new THREE.Mesh(geometry, treeMaterial);
-    // treeBody.rotation.y = -Math.PI / 2;
-    // treeBody.scale.set(.02, .02, .02);
     treeBody.position.x = 4;
     treeBody.position.y = 4;
     treeBody.position.z = 2;
@@ -490,6 +510,26 @@ function createTree() {
 
 
   scene.add(treeBody);
+}
+
+
+/**
+ * Create a road on the floor between two points.
+ *
+ * X and Z coordinates of the road are simply the middle between start and end
+ * points. The Y coordinate is randomly chosen between 1 and 2 millimeters,
+ * to prevent display glitch. Note : road have no mass
+ *
+ * @param {{x: number, z:number}} a Road start XZ-coordinates.
+ * @param {{x: number, z:number}} b Road end XZ-coordinates.
+ */
+function createRoad(a, b) {
+  createSimpleObject({shape: 'plane',
+    size: [Math.sqrt((b.x - a.x) * (b.x - a.x) + (b.z - a.z) * (b.z - a.z)), 2],
+    pos: [(b.x + a.x) / 2, (1 + Math.random()) / 1000, (b.z + a.z) / 2],
+    rot: [0, - Math.atan((b.z - a.z) / (b.x - a.x)), 0],
+    m: 0,
+    texture: 'images/pave.jpg'});
 }
 
 
@@ -508,26 +548,6 @@ function createRoads() {
   createRoad({x: -20, z: 0}, {x: -120, z: 100});
   createRoad({x: 20, z: 0}, {x: 120, z: 100});
   createRoad({x: 20, z: 0}, {x: 120, z: -100});
-}
-
-
-/**
- * Create a road on the floor between two points.
- * @param {{x: number, z:number}} a Road start XZ-coordinates.
- * @param {{x: number, z:number}} b Road end XZ-coordinates.
- */
-function createRoad(a, b) {
-  createSimpleObject({shape: 'plane',
-    // Road length is the sqare root of (x2 - x1)^2 + (z2 - z1)^2
-    size: [Math.sqrt((b.x - a.x) * (b.x - a.x) +
-                     (b.z - a.z) * (b.z - a.z)), 2],
-    // X and Z coordinates of the road are simply the middle between start
-    // and end points. The Y coordinate is randomly chosen between 1 and 2
-    // millimeters, to prevent display glitch.
-    pos: [(b.x + a.x) / 2, (1 + Math.random()) / 1000, (b.z + a.z) / 2],
-    rot: [0, - Math.atan((b.z - a.z) / (b.x - a.x)), 0],
-    m: 0, // The road have no mass
-    texture: 'images/pave.jpg'});
 }
 
 

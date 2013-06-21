@@ -753,7 +753,7 @@ var Physijs = (function() {
         collisions = {}, collided_with = [];
 
     // Build collision manifest
-    for (i = 0; i < data[1]; i++) {
+    for (var i = 0, j = data[1]; i < j; i++) {
       offset = 2 + i * 2;
       object = data[offset];
       object2 = data[offset + 1];
@@ -772,7 +772,7 @@ var Physijs = (function() {
         // this object is touching others
         collided_with.length = 0;
 
-        for (j = 0; j < collisions[object._physijs.id].length; j++) {
+        for (var i = 0, j = collisions[object._physijs.id].length; i < j; j++) {
           object2 = this._objects[collisions[object._physijs.id][j]];
 
           if (object2) {
@@ -794,7 +794,7 @@ var Physijs = (function() {
             collided_with.push(object2._physijs.id);
           }
         }
-        for (j = 0; j < object._physijs.touches.length; j++) {
+        for (var j = 0; j < object._physijs.touches.length; j++) {
           if (collided_with.indexOf(object._physijs.touches[j]) === -1) {
             object._physijs.touches.splice(j--, 1);
           }
@@ -1284,6 +1284,7 @@ var Physijs = (function() {
    * @param {Object} geometry
    * @param {Object} material
    * @param {number} mass
+   * @constructor
    */
   Physijs.BoxMesh = function(geometry, material, mass) {
     var width, height, depth;

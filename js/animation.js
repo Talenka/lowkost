@@ -23,6 +23,13 @@ var md2meshBody;
 
 
 /**
+ * Tree mesh
+ * @type {Object}
+ */
+var treeBody;
+
+
+/**
  * Player motion state
  * @type {Object}
  */
@@ -399,7 +406,6 @@ function createRiverSpring() {
  */
 function createTree() {
 
-  var treeBody;
   var treeMaterial = new THREE.MeshLambertMaterial({
     ambient: 0x999999,
     color: 0x00ff00,
@@ -410,9 +416,9 @@ function createTree() {
   loader = new THREE.JSONLoader();
 
   loader.load('js/tree.js', function(geometry) {
-    treeBody = new THREE.MorphAnimMesh(geometry, treeMaterial);
-    treeBody.rotation.y = -Math.PI / 2;
-    treeBody.scale.set(.02, .02, .02);
+    treeBody = new THREE.Mesh(geometry, treeMaterial);
+    // treeBody.rotation.y = -Math.PI / 2;
+    // treeBody.scale.set(.02, .02, .02);
     treeBody.position.x = 4;
     treeBody.position.y = 4;
     treeBody.position.z = 2;

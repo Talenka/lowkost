@@ -121,6 +121,6 @@ window.addEventListener('DOMContentLoaded', function() {
   // Say hello, world !
   document.title = 'Talenka Low Kost';
 
-  loadStuff();
+  window.setTimeout(loadStuff, 200);
 
 }, false);

@@ -297,34 +297,13 @@ function createPlayer(geometry) {
  * Create some cubes to test world basic physics
  */
 function createCubes() {
-  var meshArray = [];
-
-  for (var i = 0; i < 5; i++) {
-
+  for (var i = 0; i < 5; i++)
     createSimpleObject({
       shape: 'cube',
       color: WHITE * Math.random(),
       size: [0.5 + Math.random(), 0.5 + Math.random(), 0.5 + Math.random()],
       pos: [i % 2 * 5 - 2.5, 10 * Math.random(), -0.8 * i],
       rot: [Math.random(), Math.random(), Math.random()]});
-
-    // meshArray[i] = new Physijs.BoxMesh(new THREE.CubeGeometry(1 + Math.random(),
-    //                                                           Math.random(), 1),
-    //                                    new THREE.MeshLambertMaterial({
-    //                                      color: WHITE * Math.random()}));
-
-    // meshArray[i].position.x = i % 2 * 5 - 2.5;
-    // meshArray[i].position.y = 10 * Math.random();
-    // meshArray[i].position.z = -0.8 * i;
-
-    // meshArray[i].rotation.x = Math.random();
-    // meshArray[i].rotation.y = Math.random();
-    // meshArray[i].rotation.z = Math.random();
-
-    // meshArray[i].castShadow = true;
-    // meshArray[i].receiveShadow = true;
-    // scene.add(meshArray[i]);
-  }
 }
 
 
@@ -471,8 +450,6 @@ function createSimpleObject(params) {
  * TODO
  */
 function createRiverSpring() {
-
-
   var spring = new Physijs.BoxMesh(
       new THREE.CylinderGeometry(5, 5, 0.2, 32, 2, true),
       new THREE.MeshLambertMaterial({color: 0xaa0000}));
@@ -482,34 +459,6 @@ function createRiverSpring() {
   spring.position.z = -10;
 
   scene.add(spring);
-}
-
-
-/**
- * Test to load a un-animated model
- */
-function createTree() {
-
-  var treeMaterial = new THREE.MeshLambertMaterial({
-    ambient: 0x999999,
-    color: 0x00ff00,
-    specular: WHITE,
-    shininess: 25,
-    morphTargets: true});
-
-  loader = new THREE.JSONLoader();
-
-  loader.load('js/tree.js', function(geometry) {
-    treeBody = new THREE.Mesh(geometry, treeMaterial);
-    treeBody.position.x = 4;
-    treeBody.position.y = 4;
-    treeBody.position.z = 2;
-    treeBody.castShadow = true;
-    treeBody.receiveShadow = true;
-  });
-
-
-  scene.add(treeBody);
 }
 
 
@@ -537,7 +486,6 @@ function createRoad(a, b) {
  * Create the basic road system on the map
  */
 function createRoads() {
-
   createRoad({x: 0, z: 500}, {x: 0, z: -500});
   createRoad({x: 0, z: -20}, {x: 100, z: -120});
   createRoad({x: 0, z: -20}, {x: -100, z: -120});
